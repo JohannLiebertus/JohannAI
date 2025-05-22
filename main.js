@@ -1,3 +1,5 @@
+const API_URL = "https://johannai-2.onrender.com";
+
 const sendBtn = document.getElementById("send-btn");
 const userInput = document.getElementById("user-input");
 const chatDisplay = document.getElementById("chat-display");
@@ -8,6 +10,7 @@ sendBtn.addEventListener("click", () => {
   const text = userInput.value.trim();
   if (!text) return;
 
+  // User-Nachricht anzeigen
   const userMsg = document.createElement("div");
   userMsg.className = "chat-msg user";
   userMsg.textContent = text;
@@ -15,7 +18,7 @@ sendBtn.addEventListener("click", () => {
 
   userInput.value = "";
 
-  fetch("http://127.0.0.1:5000/chat", {
+  fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text }),
@@ -33,10 +36,12 @@ sendBtn.addEventListener("click", () => {
     });
 });
 
+// Clear Button Funktion
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
 });
 
+// Dark / Light Mode Toggle
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
 });
