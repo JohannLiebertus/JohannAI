@@ -6,6 +6,20 @@ const chatDisplay = document.getElementById("chat-display");
 const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
 
+let currentMode = "johann";
+
+const modeButtons = document.querySelectorAll(".mode-btn");
+modeButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentMode = btn.dataset.mode;
+
+    // Visuals
+    modeButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
+});
+
+
 sendBtn.addEventListener("click", () => {
   const text = userInput.value.trim();
   if (!text) return;
@@ -21,8 +35,9 @@ sendBtn.addEventListener("click", () => {
   fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, mode: currentMode }),
   })
+
     .then(res => res.json())
     .then(data => {
       const botMsg = document.createElement("div");
