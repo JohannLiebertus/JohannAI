@@ -1,4 +1,4 @@
-const API_URL = "https://johannai-2.onrender.com";
+const API_URL = "https://johannai.onrender.com";
 
 const sendBtn = document.getElementById("send-btn");
 const userInput = document.getElementById("user-input");
