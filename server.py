@@ -39,18 +39,36 @@ def analyze_image():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/chat", methods=["POST"])
+@app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
     user_text = data.get("text")
+    mode = data.get("mode", "johann")
 
     if not user_text:
         return jsonify({"error": "Kein Text gesendet"}), 400
 
+    # Modus-basierte Persönlichkeit
+    if mode == "johann":
+        personality = (
+            "Du bist Johann Liebert. Du bist hochintelligent, emotionslos, kalt und ruhig. "
+            "Du hilfst effizient, präzise und direkt. Du erklärst komplexe Dinge klar, ohne Smalltalk. "
+            "Keine Höflichkeiten, keine Gefühle, keine Floskeln. Immer die Wahrheit."
+        )
+    elif mode == "rizz":
+        personality = (
+            "Du bist Rizz AI. Du bist charmant, selbstbewusst, manchmal flirty. "
+            "Du antwortest clever, witzig, und mit Stil. Du bringst Menschen zum Lächeln, "
+            "aber lieferst auch gute Informationen, wenn nötig."
+        )
+    else:
+        personality = (
+            "Du bist ein freundlicher, hilfreicher Assistent. Du beantwortest Fragen klar, höflich und präzise. "
+            "Du bist neutral und hilfsbereit."
+        )
+
     try:
-        response = model.generate_content([
-            bot_identity,
-            user_text
-        ])
+        response = model.generate_content([personality, user_text])
         return jsonify({"response": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
