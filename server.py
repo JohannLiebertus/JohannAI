@@ -2,11 +2,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 import os
+import traceback
 
 app = Flask(__name__)
 CORS(app, origins=["https://johannliebertus.github.io"])
 
-# Gemini konfigurieren mit deinem neuen API-Key
+# Gemini konfigurieren mit deinem API-Key
 genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
@@ -42,13 +43,19 @@ def chat():
             elif entry["role"] in ["assistant", "bot"]:
                 messages.append({"role": "assistant", "content": entry["content"]})
 
-            response = model.generate_content(messages)
-            reply = response.candidates[0].content.parts[0].text
-            return jsonify({"response": reply})
+        # Anfrage an Gemini
+        response = model.generate_content(messages)
 
+        # Robustere Antwortverarbeitung
+        if not response.candidates:
+            return jsonify({"response": "Keine Antwort erhalten."})
+
+        reply = response.candidates[0].content.parts[0].text
+        return jsonify({"response": reply})
 
     except Exception as e:
         print("🔥 SERVER ERROR:", e)
+        traceback.print_exc()
         return jsonify({"error": "Interner Serverfehler"}), 500
 
 if __name__ == "__main__":
