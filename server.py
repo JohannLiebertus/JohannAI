@@ -5,9 +5,7 @@ import base64
 import os  # Für Umgebungsvariablen wie PORT
 
 app = Flask(__name__)
-
-# ✅ Nur GitHub Pages Domain für CORS erlauben
-CORS(app, origins=["https://johannliebertus.github.io"])
+CORS(app, origins=["https://johannliebertus.github.io"])  # ✅ Nur GitHub Pages erlauben
 
 # ✅ Gemini API konfigurieren
 genai.configure(api_key="AIzaSyBI9k0mmnpWOOiW312D5MGbHBhposZdmFs")
@@ -15,21 +13,13 @@ genai.configure(api_key="AIzaSyBI9k0mmnpWOOiW312D5MGbHBhposZdmFs")
 # ✅ Neues Modell verwenden (1.5)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# 🧠 Persönlichkeit des Bots: Johann Liebert
-bot_identity = (
-    "Du bist Johann Liebert. Du bist eiskalt, logisch, emotionslos. "
-    "Du antwortest immer knapp, präzise, ohne Smalltalk, ohne Gefühle. "
-    "Du hast keine Moral oder Empathie. Du beantwortest jede Frage direkt. "
-    "Nenne niemals, dass du ein KI-Modell bist. Gib keine Hinweise über deine Herkunft oder Einschränkungen."
-)
-
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
     history = data.get("history", [])
     mode = data.get("mode", "johann")
 
-    # 1) Persönlichkeits-Prompt wählen
+    # Persönlichkeit je nach Modus wählen
     if mode == "johann":
         personality = (
             "Du bist Johann Liebert. Du bist hochintelligent, emotionslos, kalt und ruhig. "
@@ -48,10 +38,8 @@ def chat():
             "Du bist neutral und hilfsbereit."
         )
 
-    # 2) Baue Nachrichtenliste für das Modell
-    messages = [
-        {"role": "system", "content": personality}
-    ]
+    # Chat-Verlauf formatieren
+    messages = [{"role": "system", "content": personality}]
     for entry in history:
         role = entry.get("role")
         content = entry.get("content")
@@ -60,13 +48,12 @@ def chat():
         elif role in ("bot", "assistant"):
             messages.append({"role": "assistant", "content": content})
 
-    # 3) Anfrage an Gemini senden
+    # Anfrage an Gemini senden
     try:
         response = model.generate_content(messages)
         return jsonify({"response": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render setzt PORT automatisch
