@@ -37,7 +37,7 @@ sendBtn.addEventListener("click", () => {
 
   userInput.value = "";
 
-  fetch("https://johannai-2.onrender.com/chat", {
+  fetch("https://johannai.onrender.com", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
