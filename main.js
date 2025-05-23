@@ -5,11 +5,11 @@ const userInput = document.getElementById("user-input");
 const chatDisplay = document.getElementById("chat-display");
 const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
+const modeButtons = document.querySelectorAll(".mode-btn");
 
 let currentMode = "johann";
 let chatHistory = [];
 
-const modeButtons = document.querySelectorAll(".mode-btn");
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentMode = btn.dataset.mode;
@@ -18,16 +18,16 @@ modeButtons.forEach(btn => {
   });
 });
 
-sendBtn.addEventListener("click", () => {
+sendBtn.addEventListener("click", sendMessage);
+userInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
 
-  const userMsg = document.createElement("div");
-  userMsg.className = "chat-msg user";
-  userMsg.textContent = text;
-  chatDisplay.appendChild(userMsg);
-
-  chatHistory.push({ role: "user", content: text });
+  addMessage("user", text);
   userInput.value = "";
 
   fetch(`${API_URL}/chat`, {
@@ -35,7 +35,7 @@ sendBtn.addEventListener("click", () => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       history: chatHistory,
-      mode: currentMode,
+      mode: currentMode
     }),
   })
     .then(res => {
@@ -43,22 +43,26 @@ sendBtn.addEventListener("click", () => {
       return res.json();
     })
     .then(data => {
-      const responseText = data.response || data.error || "Keine Antwort.";
-      const botMsg = document.createElement("div");
-      botMsg.className = "chat-msg bot";
-      botMsg.textContent = responseText;
-      chatDisplay.appendChild(botMsg);
-
-      chatHistory.push({ role: "bot", content: responseText });
-      chatDisplay.scrollTop = chatDisplay.scrollHeight;
+      const reply = data.response || "Keine Antwort vom Bot.";
+      addMessage("bot", reply);
     })
     .catch(err => {
-      const errorMsg = document.createElement("div");
-      errorMsg.className = "chat-msg error";
-      errorMsg.textContent = "Fehler: " + err.message;
-      chatDisplay.appendChild(errorMsg);
+      addMessage("error", "Fehler: " + err.message);
     });
-});
+}
+
+function addMessage(role, content) {
+  const msg = document.createElement("div");
+  msg.className = `chat-msg ${role}`;
+  msg.textContent = content;
+  chatDisplay.appendChild(msg);
+
+  if (role === "user" || role === "bot") {
+    chatHistory.push({ role, content });
+  }
+
+  chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
 
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
