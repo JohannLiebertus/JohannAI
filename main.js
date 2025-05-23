@@ -7,37 +7,34 @@ const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
 
 let currentMode = "johann";
-let chatHistory = []; // ← Neues Gedächtnis
+let chatHistory = []; // Gedächtnis
 
-
+// Mode-Buttons
 const modeButtons = document.querySelectorAll(".mode-btn");
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentMode = btn.dataset.mode;
-
-    // Visuals
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
   });
 });
 
-
+// Nachricht senden
 sendBtn.addEventListener("click", () => {
   const text = userInput.value.trim();
   if (!text) return;
 
-  // Zeige Nutzernachricht
+  // User-Nachricht anzeigen
   const userMsg = document.createElement("div");
   userMsg.className = "chat-msg user";
   userMsg.textContent = text;
   chatDisplay.appendChild(userMsg);
 
-  // Gedächtnis erweitern
   chatHistory.push({ role: "user", content: text });
-
   userInput.value = "";
 
-  fetch("https://johannai.onrender.com", {
+  // ✅ RICHTIGE ROUTE /chat
+  fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -49,13 +46,11 @@ sendBtn.addEventListener("click", () => {
     .then(data => {
       const responseText = data.response || data.error || "Keine Antwort vom Bot.";
 
-      // Zeige Bot-Nachricht
       const botMsg = document.createElement("div");
       botMsg.className = "chat-msg bot";
       botMsg.textContent = responseText;
       chatDisplay.appendChild(botMsg);
 
-      // Gedächtnis erweitern
       chatHistory.push({ role: "bot", content: responseText });
 
       chatDisplay.scrollTop = chatDisplay.scrollHeight;
@@ -65,15 +60,13 @@ sendBtn.addEventListener("click", () => {
     });
 });
 
-
-// Clear Button Funktion
+// Clear-Button
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
-  chatHistory = []; // ← Gedächtnis leeren
+  chatHistory = []; // Gedächtnis löschen
 });
 
-
-// Dark / Light Mode Toggle
+// Theme Toggle
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
 });
