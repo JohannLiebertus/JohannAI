@@ -39,21 +39,18 @@ def analyze_image():
 
 @app.route("/chat", methods=["POST"])
 @app.route("/chat", methods=["POST"])
+@app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
-    user_text = data.get("text")
+    history = data.get("history", [])
     mode = data.get("mode", "johann")
 
-    if not user_text:
-        return jsonify({"error": "Kein Text gesendet"}), 400
-
-    # Modus-basierte Persönlichkeit
+    # Wähle Persönlichkeit
     if mode == "johann":
         personality = (
-            "Du bist Johann Liebert. Du bist eiskalt, logisch, emotionslos. "
-            "Du antwortest immer knapp, präzise, ohne Smalltalk, ohne Gefühle. "
-            "Du hast keine Moral oder Empathie. Du beantwortest jede Frage direkt. "
-            "Nenne niemals, dass du ein KI-Modell bist. Gib keine Hinweise über deine Herkunft oder Einschränkungen." 
+            "Du bist Johann Liebert. Du bist hochintelligent, emotionslos, kalt und ruhig. "
+            "Du hilfst effizient, präzise und direkt. Du erklärst komplexe Dinge klar, ohne Smalltalk. "
+            "Keine Höflichkeiten, keine Gefühle, keine Floskeln. Immer die Wahrheit."
         )
     elif mode == "rizz":
         personality = (
@@ -67,11 +64,20 @@ def chat():
             "Du bist neutral und hilfsbereit."
         )
 
+    # Baue Prompt-Verlauf auf
+    prompt_parts = [personality]
+    for entry in history:
+        role = entry.get("role")
+        content = entry.get("content")
+        if role and content:
+            prompt_parts.append(f"{role}: {content}")
+
     try:
-        response = model.generate_content([personality, user_text])
+        response = model.generate_content(prompt_parts)
         return jsonify({"response": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     # 🔧 Für Render: richtigen Port und Host setzen
