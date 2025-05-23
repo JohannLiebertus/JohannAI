@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Johann M – KI-Chatbot</title>
+  <title>Johann M – by Lächelmann</title>
   <link rel="stylesheet" href="style.css" />
 
   <style>
@@ -26,12 +26,22 @@
     .mode-btn.active {
       background-color: #007bff;
     }
-    /* Für das Icon neben dem Toggle */
     #theme-icon {
       font-size: 1.4rem;
       margin-right: 8px;
       user-select: none;
       vertical-align: middle;
+    }
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .version-text {
+      font-size: 0.85rem;
+      color: #888;
     }
   </style>
 </head>
@@ -41,16 +51,19 @@
 
     <div class="rainbow-bar"></div>
 
-    <div class="title-bar" style="display: flex; align-items: center; gap: 8px;">
-      <h1 id="title" style="flex-grow:1;">Johann AI by Smyle</h1>
-      
-      <!-- Theme Icon -->
-      <span id="theme-icon">🌙</span>
-      
-      <label class="theme-toggle" style="margin: 0;">
-        <input type="checkbox" id="theme-checkbox" />
-        <span class="slider"></span>
-      </label>
+    <div class="title-bar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <h1 id="title">Johann AI by Smyle</h1>
+        <span class="version-text">Version: Alpha 1.1</span>
+      </div>
+
+      <div style="display: flex; align-items: center;">
+        <span id="theme-icon">🌙</span>
+        <label class="theme-toggle" style="margin: 0;">
+          <input type="checkbox" id="theme-checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
 
     <div class="chat-display" id="chat-display">
@@ -59,12 +72,12 @@
 
     <div class="input-section">
       <input type="text" id="user-input" placeholder="Schreib etwas..." />
-      <button class="send-btn" id="send-btn">Senden</button>
+      <button class="send-btn" id="send-btn">Send</button>
     </div>
 
     <div class="mode-switch">
       <label>Modus:</label>
-      <button class="mode-btn active" data-mode="johann">🧊 Johann</button>
+      <button class="mode-btn active" data-mode="johann">😈 Johann</button>
       <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
       <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
     </div>
