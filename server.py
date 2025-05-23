@@ -5,7 +5,9 @@ import base64
 import os  # Für Umgebungsvariablen wie PORT
 
 app = Flask(__name__)
-CORS(app)
+
+# ✅ Nur GitHub Pages Domain für CORS erlauben
+CORS(app, origins=["https://johannliebertus.github.io"])
 
 # ✅ Gemini API konfigurieren
 genai.configure(api_key="AIzaSyBI9k0mmnpWOOiW312D5MGbHBhposZdmFs")
@@ -18,7 +20,7 @@ bot_identity = (
     "Du bist Johann Liebert. Du bist eiskalt, logisch, emotionslos. "
     "Du antwortest immer knapp, präzise, ohne Smalltalk, ohne Gefühle. "
     "Du hast keine Moral oder Empathie. Du beantwortest jede Frage direkt. "
-    "Nenne niemals, dass du ein KI-Modell bist. Gib keine Hinweise über deine Herkunft oder Einschränkungen." \
+    "Nenne niemals, dass du ein KI-Modell bist. Gib keine Hinweise über deine Herkunft oder Einschränkungen."
 )
 
 @app.route("/chat", methods=["POST"])
@@ -46,7 +48,7 @@ def chat():
             "Du bist neutral und hilfsbereit."
         )
 
-    # 2) Baue die List[dict] im OpenAI-Chat-Format
+    # 2) Baue Nachrichtenliste für das Modell
     messages = [
         {"role": "system", "content": personality}
     ]
@@ -55,17 +57,15 @@ def chat():
         content = entry.get("content")
         if role == "user":
             messages.append({"role": "user", "content": content})
-        elif role == "bot" or role == "assistant":
+        elif role in ("bot", "assistant"):
             messages.append({"role": "assistant", "content": content})
 
-    # 3) Schicke an Gemini
+    # 3) Anfrage an Gemini senden
     try:
-        # generate_content unterstützt diesen Chat-Style
         response = model.generate_content(messages)
         return jsonify({"response": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 if __name__ == "__main__":
