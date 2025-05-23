@@ -9,7 +9,7 @@ const themeCheckbox = document.getElementById("theme-checkbox");
 let currentMode = "johann";
 let chatHistory = []; // Gedächtnis
 
-// Mode-Buttons
+// Modus-Buttons
 const modeButtons = document.querySelectorAll(".mode-btn");
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -24,7 +24,7 @@ sendBtn.addEventListener("click", () => {
   const text = userInput.value.trim();
   if (!text) return;
 
-  // User-Nachricht anzeigen
+  // Nutzer-Nachricht anzeigen
   const userMsg = document.createElement("div");
   userMsg.className = "chat-msg user";
   userMsg.textContent = text;
@@ -33,7 +33,7 @@ sendBtn.addEventListener("click", () => {
   chatHistory.push({ role: "user", content: text });
   userInput.value = "";
 
-  // ✅ RICHTIGE ROUTE /chat
+  // API-Aufruf an die richtige Route
   fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -42,7 +42,10 @@ sendBtn.addEventListener("click", () => {
       mode: currentMode,
     }),
   })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`Serverfehler: ${res.status}`);
+      return res.json();
+    })
     .then(data => {
       const responseText = data.response || data.error || "Keine Antwort vom Bot.";
 
@@ -56,17 +59,20 @@ sendBtn.addEventListener("click", () => {
       chatDisplay.scrollTop = chatDisplay.scrollHeight;
     })
     .catch(err => {
-      alert("Fehler: " + err);
+      const errorMsg = document.createElement("div");
+      errorMsg.className = "chat-msg error";
+      errorMsg.textContent = "Fehler: " + err.message;
+      chatDisplay.appendChild(errorMsg);
     });
 });
 
-// Clear-Button
+// Chatverlauf löschen
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
-  chatHistory = []; // Gedächtnis löschen
+  chatHistory = [];
 });
 
-// Theme Toggle
+// Dark Mode umschalten
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
 });
