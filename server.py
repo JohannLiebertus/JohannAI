@@ -4,8 +4,7 @@ import google.generativeai as genai
 import os
 
 app = Flask(__name__)
-CORS(app, origins=["https://johannliebertus.github.io/JohannAI"])
-
+CORS(app, origins=["https://johannliebertus.github.io"])
 
 # Gemini konfigurieren mit deinem neuen API-Key
 genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")
