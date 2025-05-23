@@ -7,9 +7,8 @@ const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
 
 let currentMode = "johann";
-let chatHistory = []; // Gedächtnis
+let chatHistory = [];
 
-// Modus-Buttons
 const modeButtons = document.querySelectorAll(".mode-btn");
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -19,12 +18,10 @@ modeButtons.forEach(btn => {
   });
 });
 
-// Nachricht senden
 sendBtn.addEventListener("click", () => {
   const text = userInput.value.trim();
   if (!text) return;
 
-  // Nutzer-Nachricht anzeigen
   const userMsg = document.createElement("div");
   userMsg.className = "chat-msg user";
   userMsg.textContent = text;
@@ -33,7 +30,6 @@ sendBtn.addEventListener("click", () => {
   chatHistory.push({ role: "user", content: text });
   userInput.value = "";
 
-  // API-Aufruf an die richtige Route
   fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -47,15 +43,13 @@ sendBtn.addEventListener("click", () => {
       return res.json();
     })
     .then(data => {
-      const responseText = data.response || data.error || "Keine Antwort vom Bot.";
-
+      const responseText = data.response || data.error || "Keine Antwort.";
       const botMsg = document.createElement("div");
       botMsg.className = "chat-msg bot";
       botMsg.textContent = responseText;
       chatDisplay.appendChild(botMsg);
 
       chatHistory.push({ role: "bot", content: responseText });
-
       chatDisplay.scrollTop = chatDisplay.scrollHeight;
     })
     .catch(err => {
@@ -66,13 +60,11 @@ sendBtn.addEventListener("click", () => {
     });
 });
 
-// Chatverlauf löschen
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
   chatHistory = [];
 });
 
-// Dark Mode umschalten
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
 });
