@@ -1,4 +1,4 @@
-const API_URL = "https://johannai.onrender.com";
+const API_URL = "https://johannai.onrender.com"; // ✅ korrekt
 
 const sendBtn = document.getElementById("send-btn");
 const userInput = document.getElementById("user-input");
@@ -6,10 +6,12 @@ const chatDisplay = document.getElementById("chat-display");
 const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
 const modeButtons = document.querySelectorAll(".mode-btn");
+const themeIcon = document.getElementById("theme-icon");
 
 let currentMode = "johann";
 let chatHistory = [];
 
+// Mode Buttons
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentMode = btn.dataset.mode;
@@ -18,6 +20,7 @@ modeButtons.forEach(btn => {
   });
 });
 
+// Send Message on Button Click or Enter
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
@@ -35,7 +38,8 @@ function sendMessage() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       history: chatHistory,
-      mode: currentMode
+      mode: currentMode,
+      message: text // message auch mitgeben, falls nötig
     }),
   })
     .then(res => {
@@ -64,11 +68,27 @@ function addMessage(role, content) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
+// Clear Button
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
   chatHistory = [];
 });
 
+// Theme Toggle & Icon wechseln
+function updateThemeIcon() {
+  if (themeCheckbox.checked) {
+    // Dark Mode an → Sonne anzeigen
+    themeIcon.textContent = '🌞';
+  } else {
+    // Light Mode an → Mond anzeigen
+    themeIcon.textContent = '🌙';
+  }
+}
+
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
+  updateThemeIcon();
 });
+
+// Icon initial setzen
+updateThemeIcon();
