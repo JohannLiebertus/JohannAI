@@ -4,7 +4,7 @@ import google.generativeai as genai
 import os
 
 app = Flask(__name__)
-CORS(app, origins=["https://johannliebertus.github.io"]) #kek
+CORS(app, origins=["https://johannliebertus.github.io"])
 
 # Gemini konfigurieren mit deinem neuen API-Key
 genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")
@@ -42,8 +42,10 @@ def chat():
             elif entry["role"] in ["assistant", "bot"]:
                 messages.append({"role": "assistant", "content": entry["content"]})
 
-        response = model.generate_content(messages)
-        return jsonify({"response": response.text})
+            response = model.generate_content(messages)
+            reply = response.candidates[0].content.parts[0].text
+            return jsonify({"response": reply})
+
 
     except Exception as e:
         print("🔥 SERVER ERROR:", e)
