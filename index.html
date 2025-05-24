@@ -3,299 +3,280 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Johann M – Evil Mode Demo</title>
+  <title>Johann M – by Lächelmann</title>
+  <link rel="stylesheet" href="style.css" />
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #222;
-      color: white;
-      margin: 20px;
-      text-align: center;
+    .mode-switch{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .mode-btn{padding:6px 12px;border:none;border-radius:8px;background:#444;color:#fff;cursor:pointer;font-size:.9rem; position: relative;}
+    .mode-btn.active{background:#007bff}
+    #theme-icon{font-size:1.4rem;margin-right:8px;user-select:none}
+    .title-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .version-text{font-size:.85rem;color:#888}
+    #image-input{color:#fff}
+
+    /* Evil Mode Locked Style */
+    .mode-btn.evil.locked {
+      filter: blur(2px);
+      cursor: default;
+      pointer-events: none; /* Kein Klick solange gesperrt */
+      color: transparent; /* Text unsichtbar */
     }
 
-    /* --- Buttons Container --- */
-    .mode-switch {
-      margin-top: 40px;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    /* --- Evil Mode Button --- */
-    #evilBtn {
-      position: relative;
-      padding: 12px 28px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      user-select: none;
-      font-weight: bold;
-      font-size: 1.1rem;
-      color: white;
-      overflow: visible;
-      outline: none;
-      transition: background-color 0.3s ease;
-    }
-
-    /* Blur Background Layer */
-    #evilBtn.locked::before {
-      content: "";
+    /* Schloss-Overlay über Evil Mode Button */
+    .mode-btn.evil.locked::after {
+      content: "🔒 Es ist verschlossen";
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      border-radius: 8px;
-      background: rgba(139, 0, 0, 0.8);
-      filter: blur(5px);
-      z-index: 0;
-    }
-
-    /* Schloss-Icon Layer */
-    #evilBtn.locked .lock-icon {
-      position: absolute;
-      top: -34px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      font-size: 2.2rem;
+      transform: translate(-50%, -50%);
       color: white;
-      text-shadow: 0 0 8px black;
-      z-index: 2;
+      font-weight: bold;
+      font-size: 14px;
       pointer-events: none;
       user-select: none;
-    }
-
-    /* Text Layer */
-    #evilBtn.locked .btn-text {
-      position: relative;
-      z-index: 3;
+      white-space: nowrap;
       text-shadow: 0 0 5px black;
-      color: white;
     }
 
-    /* Wenn unlocked */
-    #evilBtn.unlocked {
-      background-color: #b22222;
-      filter: none !important;
-      color: white;
-      cursor: pointer;
-    }
-    #evilBtn.unlocked .lock-icon {
-      display: none;
-    }
-
-    /* --- Popup Overlay --- */
-    #overlay {
+    /* Overlay */
+    .overlay {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-color: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(5px);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 10000;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    #overlay.visible {
-      visibility: visible;
-      opacity: 1;
+      z-index: 1000;
     }
 
-    /* Popup Box */
     .popup {
       background: #fff;
-      color: #000;
-      border-radius: 14px;
-      width: 320px;
-      max-width: 90vw;
-      padding: 24px 24px 20px 24px;
-      box-shadow: 0 0 25px rgba(0,0,0,0.5);
-      position: relative;
+      padding: 20px 20px 15px 20px;
+      border-radius: 12px;
       text-align: center;
-      font-family: Arial, sans-serif;
-    }
-
-    .popup p {
-      font-size: 1.15rem;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    /* Close button */
-    .popup .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #444;
-      cursor: pointer;
-      user-select: none;
-      transition: color 0.2s ease;
-    }
-    .popup .close-btn:hover {
+      max-width: 300px;
+      width: 90%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
       color: #000;
+      position: relative;
     }
 
-    /* Input */
-    #evilPassword {
+    .popup input[type="password"] {
+      padding: 8px;
       width: 100%;
-      padding: 10px 12px;
-      font-size: 1rem;
+      margin: 10px 0;
+      border: 1px solid #ccc;
       border-radius: 6px;
-      border: 1.8px solid #ccc;
-      margin-bottom: 12px;
-      box-sizing: border-box;
+      font-size: 1rem;
     }
 
-    /* Submit Button */
-    #submitPassword {
-      padding: 10px 20px;
-      background-color: #b22222;
+    .popup button.submit-btn {
+      padding: 8px 12px;
       border: none;
-      border-radius: 6px;
+      background-color: #007bff;
       color: white;
-      font-weight: 700;
-      font-size: 1rem;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-    }
-    #submitPassword:hover {
-      background-color: #800000;
+      font-size: 1rem;
     }
 
-    /* Passwort Meldung */
-    #passwordMsg {
-      font-weight: 700;
-      min-height: 1.3em;
-      font-size: 1rem;
-      margin-top: 6px;
+    .popup button.submit-btn:hover {
+      background-color: #0056b3;
     }
-    #passwordMsg.error {
+
+    .password-msg {
+      font-weight: bold;
+      margin-top: 5px;
+      min-height: 1.3em;
+      font-size: 0.95rem;
+    }
+
+    .password-msg.error {
       color: red;
     }
-    #passwordMsg.success {
+
+    .password-msg.success {
       color: green;
     }
 
+    .hidden {
+      display: none;
+    }
+
+    /* Close X Button */
+    .popup .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .popup .close-btn:hover {
+      color: #000;
+    }
   </style>
 </head>
+
 <body>
+  <div class="container">
 
-  <h1>Johann AI by Smyle</h1>
+    <div class="rainbow-bar"></div>
 
-  <div class="mode-switch">
-    <!-- Beispiel andere Buttons -->
-    <button class="mode-btn">😈 Johann</button>
-    <button class="mode-btn">😎 Rizz AI</button>
-    <button class="mode-btn">🤖 GPT Classic</button>
-    <button class="mode-btn" id="evilBtn" class="mode-btn evil locked" data-mode="evil">
-      <span class="lock-icon">🔒</span>
-      <span class="btn-text">Evil Mode</span>
-    </button>
-  </div>
-
-  <!-- Password Overlay -->
-  <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
-    <div class="popup">
-      <span class="close-btn" id="closePopup" title="Schließen">×</span>
-      <p id="popupTitle">Enter password to unlock Evil Mode:</p>
-      <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
-      <div id="passwordMsg"></div>
-      <button id="submitPassword">Submit</button>
+    <div class="title-bar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <h1 id="title">Johann AI by Smyle</h1>
+        <span class="version-text">Version: Alpha 2.1</span>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <span id="theme-icon">🌙</span>
+        <label class="theme-toggle" style="margin:0;">
+          <input type="checkbox" id="theme-checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
+
+    <div class="chat-display" id="chat-display"></div>
+
+    <div class="input-section">
+      <input type="text" id="user-input" placeholder="Nachricht eingeben...">
+      <input type="file" id="image-input" accept="image/*" style="display:none;">
+      <label for="image-input" class="file-btn" title="Bild anhängen">📎</label>
+      <button id="send-btn" class="send-btn">Senden</button>
+    </div>
+
+<div class="mode-switch">
+  <button class="mode-btn active" data-mode="johann">😈 Johann</button>
+  <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+  <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+  <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+  <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+  <button class="mode-btn" data-mode="human">Human AI 👤</button>
+  <button class="mode-btn evil locked" data-mode="evil">
+    <span class="lock-icon">🔒</span>
+    Evil Mode
+  </button>
+</div>
+
+<div class="extra-buttons">
+  <button class="extra mode-btn evil locked" onclick="showPasswordPrompt()">
+    <span class="lock-icon">🔒</span>
+    Evil Mode
+  </button>
+  <button class="extra" id="clear-btn">Clear</button>
+</div>
+
+
+    <!-- Password Overlay -->
+    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
+      <div class="popup">
+        <span class="close-btn" id="closePopup" title="Schließen">×</span>
+        <p id="popupTitle">Enter password to unlock Evil Mode:</p>
+        <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
+        <div id="passwordMsg" class="password-msg"></div>
+        <button class="submit-btn" id="submitPassword">Submit</button>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    const evilBtn = document.getElementById("evilBtn");
     const overlay = document.getElementById("overlay");
-    const passwordInput = document.getElementById("evilPassword");
-    const passwordMsg = document.getElementById("passwordMsg");
-    const closePopupBtn = document.getElementById("closePopup");
-    const submitBtn = document.getElementById("submitPassword");
+const evilBtn = document.querySelector(".mode-btn.evil");  // bestehender Evil Mode Button
+const passwordInput = document.getElementById("evilPassword");
+const passwordMsg = document.getElementById("passwordMsg");
+const closePopupBtn = document.getElementById("closePopup");
+const submitBtn = document.getElementById("submitPassword");
 
-    const SESSION_KEY = "evilModeUnlocked";
+const SESSION_KEY = "evilModeUnlocked";
 
-    // Prüfe Unlock Status
-    function checkUnlockStatus() {
-      if (sessionStorage.getItem(SESSION_KEY) === "true") {
-        unlockEvilMode();
-      } else {
-        lockEvilMode();
-      }
-    }
+function checkUnlockStatus() {
+  if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    unlockEvilMode();
+  } else {
+    lockEvilMode();
+  }
+}
 
-    function lockEvilMode() {
-      evilBtn.classList.remove("unlocked");
-      evilBtn.classList.add("locked");
-      // Entferne pointer-events none, soll klickbar sein um Popup zu öffnen
-      evilBtn.style.pointerEvents = "auto";
-    }
+function lockEvilMode() {
+  evilBtn.classList.add("locked");
+  // Durch CSS wird der Button verschwommen und das Schloss angezeigt
+  evilBtn.style.pointerEvents = "auto";  // Klickbar für Popup
+}
 
-    function unlockEvilMode() {
-      evilBtn.classList.remove("locked");
-      evilBtn.classList.add("unlocked");
-      evilBtn.style.pointerEvents = "auto";
-    }
+function unlockEvilMode() {
+  evilBtn.classList.remove("locked");
+  evilBtn.style.filter = "none";
+  evilBtn.style.color = "#fff";
+  evilBtn.style.pointerEvents = "auto";
+}
 
-    function showPasswordPrompt() {
-      passwordInput.value = "";
-      passwordMsg.textContent = "";
-      passwordMsg.className = "";
-      overlay.classList.add("visible");
-      passwordInput.focus();
-    }
+function showPasswordPrompt() {
+  passwordInput.value = "";
+  passwordMsg.textContent = "";
+  passwordMsg.className = "password-msg";
+  overlay.classList.remove("hidden");
+  passwordInput.focus();
+}
 
-    function closePasswordPrompt() {
-      overlay.classList.remove("visible");
-    }
+function closePasswordPrompt() {
+  overlay.classList.add("hidden");
+}
 
-    function checkPassword() {
-      const entered = passwordInput.value.trim();
-      if (entered === "vape") {
-        passwordMsg.textContent = "Successful!";
-        passwordMsg.className = "success";
-        sessionStorage.setItem(SESSION_KEY, "true");
+function checkPassword() {
+  const entered = passwordInput.value.trim();
+  if (entered === "vape") {
+    passwordMsg.textContent = "Successful!";
+    passwordMsg.className = "password-msg success";
+    sessionStorage.setItem(SESSION_KEY, "true");
 
-        setTimeout(() => {
-          closePasswordPrompt();
-          unlockEvilMode();
-          alert("Evil Mode aktiviert!");
-        }, 800);
-      } else {
-        passwordMsg.textContent = "Wrong password!";
-        passwordMsg.className = "error";
-      }
-    }
+    setTimeout(() => {
+      closePasswordPrompt();
+      unlockEvilMode();
+      alert("Evil Mode aktiviert!");
+    }, 800);
+  } else {
+    passwordMsg.textContent = "Wrong password!";
+    passwordMsg.className = "password-msg error";
+  }
+}
 
-    // Events
-    evilBtn.addEventListener("click", () => {
-      if (evilBtn.classList.contains("locked")) {
-        showPasswordPrompt();
-      } else {
-        alert("Evil Mode ist schon aktiviert!");
-      }
-    });
+// Button Klick öffnet Popup, wenn locked
+evilBtn.addEventListener("click", () => {
+  if (evilBtn.classList.contains("locked")) {
+    showPasswordPrompt();
+  } else {
+    alert("Evil Mode ist bereits aktiviert!");
+  }
+});
 
-    submitBtn.addEventListener("click", checkPassword);
+submitBtn.addEventListener("click", checkPassword);
 
-    closePopupBtn.addEventListener("click", closePasswordPrompt);
+closePopupBtn.addEventListener("click", closePasswordPrompt);
 
-    passwordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") checkPassword();
-      if (e.key === "Escape") closePasswordPrompt();
-    });
+passwordInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") checkPassword();
+  if (e.key === "Escape") closePasswordPrompt();
+});
 
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && overlay.classList.contains("visible")) {
-        closePasswordPrompt();
-      }
-    });
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
+    closePasswordPrompt();
+  }
+});
 
-    // Beim Laden prüfen
-    checkUnlockStatus();
+// Beim Laden prüfen
+checkUnlockStatus();
+
   </script>
+
+  <script src="main.js"></script>
 </body>
 </html>
