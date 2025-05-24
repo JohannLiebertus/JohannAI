@@ -7,61 +7,82 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    .mode-switch{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-    .mode-btn{padding:6px 12px;border:none;border-radius:8px;background:#444;color:#fff;cursor:pointer;font-size:.9rem; position: relative;}
-    .mode-btn.active{background:#007bff}
-    #theme-icon{font-size:1.4rem;margin-right:8px;user-select:none}
-    .title-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-    .version-text{font-size:.85rem;color:#888}
-    #image-input{color:#fff}
+    .mode-switch {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+    }
 
-    /* Evil Mode Locked Style */
-/* Evil Mode Locked Style */
+    .mode-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: #fff;
+      cursor: pointer;
+      font-size: .9rem;
+      position: relative;
+    }
+
+    .mode-btn.active {
+      background: #007bff;
+    }
+
+    #theme-icon {
+      font-size: 1.4rem;
+      margin-right: 8px;
+      user-select: none;
+    }
+
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .version-text {
+      font-size: .85rem;
+      color: #888;
+    }
+
+    #image-input {
+      color: #fff;
+    }
+
+    /* EVIL MODE: Blur */
     .mode-btn.evil.locked {
       position: relative;
-      cursor: not-allowed;
-      filter: blur(2px);
+      filter: blur(3px);
       color: transparent;
       background: #222;
       pointer-events: none;
-}
+    }
 
-/* Schloss-Overlay (sichtbar trotz Blur) */
-    .mode-btn.evil.locked::before {
-      content: "🔒";
+    /* Extra Schloss-Overlay, NICHT im Button */
+    .lock-icon-overlay {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       font-size: 1.6rem;
       color: white;
-      filter: none;
-      text-shadow: 0 0 5px black;
+      z-index: 10;
       pointer-events: none;
+      text-shadow: 0 0 6px black;
       user-select: none;
-}
-
-/* Zusätzliches Label "Evil Mode" darunter */
-    .mode-btn.evil.locked::after {
-      content: "Evil Mode";
-      position: absolute;
-      top: 70%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 0.75rem;
-      text-shadow: 0 0 3px black;
-      pointer-events: none;
-      user-select: none;
-}
-
+      transform: translate(-50%, -50%);
+    }
 
     /* Overlay */
     .overlay {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.6);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(5px);
       display: flex;
       justify-content: center;
@@ -76,7 +97,7 @@
       text-align: center;
       max-width: 300px;
       width: 90%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
       color: #000;
       position: relative;
     }
@@ -123,7 +144,6 @@
       display: none;
     }
 
-    /* Close X Button */
     .popup .close-btn {
       position: absolute;
       top: 8px;
@@ -169,24 +189,24 @@
       <button id="send-btn" class="send-btn">Senden</button>
     </div>
 
-<div class="mode-switch">
-  <button class="mode-btn active" data-mode="johann">😈 Johann</button>
-  <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-  <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-  <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-  <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-  <button class="mode-btn" data-mode="human">Human AI 👤</button>
-  <button class="mode-btn evil locked" data-mode="evil">
-    <span class="lock-icon">🔒</span>
-    Evil Mode
-  </button>
-</div>
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="johann">☝ Johann</button>
+      <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+      <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+      <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+      <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+      <button class="mode-btn" data-mode="human">Human AI 👤</button>
 
-<div class="extra-buttons">
-  <button class="extra" id="clear-btn">Clear</button>
-</div>
+      <!-- EVIL MODE Button (blurred) -->
+      <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
 
+      <!-- Sharp lock overlay -->
+      <span id="evilLock" class="lock-icon-overlay">🔒</span>
+    </div>
 
+    <div class="extra-buttons">
+      <button class="extra" id="clear-btn">Clear</button>
+    </div>
 
     <!-- Password Overlay -->
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
@@ -202,5 +222,19 @@
   </div>
 
   <script src="main.js"></script>
+
+  <script>
+    function positionLockIcon() {
+      const btn = document.getElementById('evilBtn');
+      const icon = document.getElementById('evilLock');
+      const rect = btn.getBoundingClientRect();
+
+      icon.style.top = `${btn.offsetTop + btn.offsetHeight / 2}px`;
+      icon.style.left = `${btn.offsetLeft + btn.offsetWidth / 2}px`;
+    }
+
+    window.addEventListener('load', positionLockIcon);
+    window.addEventListener('resize', positionLockIcon);
+  </script>
 </body>
 </html>
