@@ -42,9 +42,12 @@ modeButtons.forEach(btn => {
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
+    // Systemprompt nur einmal hinzufügen, wenn nicht schon vorhanden
     const prompt = modePrompts[currentMode];
     if (prompt) {
-      chatHistory.push({ role: "system", content: prompt });
+      // Clear history and add system prompt fresh on mode change
+      chatHistory = [{ role: "system", content: prompt }];
+      chatDisplay.innerHTML = "";
     }
   });
 });
@@ -70,12 +73,17 @@ function sendMessage() {
     addMessage("user", text);
   }
 
+  // Johann-Modus: kein Chatverlauf senden
+  const historyToSend = currentMode === "johann" ? 
+                        chatHistory.filter(msg => msg.role === "system") : // nur system prompt
+                        chatHistory;
+
   if (imageFile) {
     const formData = new FormData();
     formData.append("image", imageFile);
     formData.append("text", text);
     formData.append("mode", currentMode);
-    formData.append("history", JSON.stringify(chatHistory));
+    formData.append("history", JSON.stringify(historyToSend));
 
     fetch(`${API_URL}/chat-image`, { method: "POST", body: formData })
       .then(handleResponse)
@@ -84,7 +92,7 @@ function sendMessage() {
     fetch(`${API_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ history: chatHistory, mode: currentMode, message: text })
+      body: JSON.stringify({ history: historyToSend, mode: currentMode, message: text })
     })
       .then(handleResponse)
       .catch(err => addMessage("error", "Fehler: " + err.message));
@@ -100,7 +108,11 @@ function addMessage(role, content) {
   msg.textContent = content;
   chatDisplay.appendChild(msg);
 
-  if (role === "user" || role === "bot") chatHistory.push({ role, content });
+  // Im Johann-Modus keine User/Bot-Nachrichten im chatHistory speichern (nur System-Prompt bleibt)
+  if ((role === "user" || role === "bot") && currentMode !== "johann") {
+    chatHistory.push({ role, content });
+  }
+
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
@@ -117,7 +129,10 @@ function addImageMessage(role, imgUrl) {
   msg.appendChild(img);
   chatDisplay.appendChild(msg);
 
-  if (role === "user") chatHistory.push({ role, content: `[Bild] ${imgUrl}` });
+  if (role === "user" && currentMode !== "johann") {
+    chatHistory.push({ role, content: `[Bild] ${imgUrl}` });
+  }
+
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
@@ -133,7 +148,9 @@ async function handleResponse(res) {
 /* ---------- Clear ---------- */
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
-  chatHistory = [];
+  // Reset history mit aktuellem Systemprompt
+  const prompt = modePrompts[currentMode];
+  chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
 });
 
 /* ---------- Dark-Mode ---------- */
