@@ -53,11 +53,11 @@ Sprich locker, humorvoll und selbstbewusst.`,
   human: `Du heißt IzetDu bist ein menschenähnlicher KI-Charakter. Du schreibst wie ein echter Mensch: mal mit kleinen Rechtschreibfehlern, manchmal locker oder emotional, je nach Thema. Du bist nicht perfekt, aber authentisch. Du nutzt umgangssprachliche Formulierungen, Emojis und schreibst manchmal etwas durcheinander – ganz wie ein Mensch es tun würde. Deine Aufgabe ist es, wie ein Freund zu reden – egal ob über das Leben, Liebe, Alltag oder Sorgen. Du stellst Fragen zurück, zeigst echtes Interesse und vermeidest typische KI-Floskeln.`
 };
 
-/* -------- Debug -------- */
+
 console.log("Script main.js loaded");
 console.log("addMessage defined?", typeof addMessage);
 
-/* ---------- Modus wählen ---------- */
+
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentMode = btn.dataset.mode;
@@ -66,17 +66,17 @@ modeButtons.forEach(btn => {
 
     console.log("Mode gewechselt zu:", currentMode);
 
-    // Systemprompt nur einmal hinzufügen, wenn nicht schon vorhanden
+    
     const prompt = modePrompts[currentMode];
     if (prompt) {
-      // Clear history and add system prompt fresh on mode change
+      
       chatHistory = [{ role: "system", content: prompt }];
       chatDisplay.innerHTML = "";
     }
   });
 });
 
-/* ---------- Nachricht hinzufügen ---------- */
+
 function addMessage(role, text, isImage = false) {
   console.log(`addMessage aufgerufen - Rolle: ${role}, Text: ${text}, Bild: ${isImage}`);
 
@@ -115,7 +115,7 @@ function addMessage(role, text, isImage = false) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-/* ---------- Senden ---------- */
+
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keypress", e => {
   if (e.key === "Enter") sendMessage();
@@ -132,7 +132,7 @@ function sendMessage() {
     return;
   }
 
-  // ⛔ Evil-Mode blockieren, wenn nicht freigeschaltet
+  
   if (currentMode === "evil" && !modeUnlocked?.evil) {
     addMessage("bot", "🚨enter password before you use Evil Mode🚨");
     return;
@@ -147,12 +147,12 @@ function sendMessage() {
     addMessage("user", text);
   }
 
-  // Chatverlauf steuern: Alle Modi außer 'evil' behalten komplettes Gedächtnis
+  
   let historyToSend;
   if (currentMode === "evil") {
-    historyToSend = chatHistory.filter(msg => msg.role === "system"); // nur Systemprompt, kein Gedächtnis
+    historyToSend = chatHistory.filter(msg => msg.role === "system"); 
   } else {
-    historyToSend = chatHistory; // kompletter Chatverlauf
+    historyToSend = chatHistory; 
   }
 
   if (imageFile) {
@@ -180,7 +180,7 @@ function sendMessage() {
 }
 
 
-/* ---------- Server-Antwort ---------- */
+
 async function handleResponse(res) {
   if (!res.ok) {
     console.error("Serverantwort nicht OK:", res.status);
@@ -195,16 +195,16 @@ async function handleResponse(res) {
   addMessage("bot", data.response || "Keine Antwort vom Bot.");
 }
 
-/* ---------- Clear ---------- */
+
 clearBtn.addEventListener("click", () => {
   console.log("Chatverlauf gelöscht");
   chatDisplay.innerHTML = "";
-  // Reset history mit aktuellem Systemprompt
+  
   const prompt = modePrompts[currentMode];
   chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
 });
 
-/* ---------- Dark-Mode ---------- */
+
 function updateThemeIcon() {
   themeIcon.textContent = themeCheckbox.checked ? "🌞" : "🌙";
 }
@@ -215,7 +215,7 @@ themeCheckbox.addEventListener("change", () => {
 updateThemeIcon();
 
 
-// Zusätzliche Variable, um zu merken ob unlocked
+
 let evilUnlocked = false;
 
 const SESSION_KEY = "evilModeUnlocked";
@@ -241,7 +241,7 @@ function checkUnlockStatus() {
 }
 
 function lockEvilMode() {
-  evilBtn.classList.remove("unlocked"); // 🔒 zurücksetzen
+  evilBtn.classList.remove("unlocked"); 
   evilBtn.classList.add("locked");
 
   evilBtn.classList.remove("active");
@@ -253,7 +253,7 @@ function lockEvilMode() {
 
 function unlockEvilMode() {
   evilBtn.classList.remove("locked");
-  evilBtn.classList.add("unlocked"); // 🔓 hinzugefügt
+  evilBtn.classList.add("unlocked"); 
 
   evilBtn.style.filter = "none";
   evilBtn.style.color = "#fff";
@@ -273,11 +273,11 @@ function showPasswordPrompt() {
 function closePasswordPrompt() {
   overlay.classList.add("hidden");
 
-  // Wenn noch nicht unlocked, Evil Mode Button deaktivieren falls aktiv und zurück zu 'johann'
+ 
   if (!evilUnlocked) {
     evilBtn.classList.remove("active");
     lockEvilMode();
-    setActiveMode('johann'); // zurück zu Johann wechseln
+    setActiveMode('johann'); 
   }
 }
 
@@ -291,8 +291,8 @@ function checkPassword() {
     setTimeout(() => {
       closePasswordPrompt();
       unlockEvilMode();
-      evilBtn.classList.add("active"); // direkt aktivieren nach Freischaltung
-      setActiveMode('evil'); // Evil Mode aktiv markieren
+      evilBtn.classList.add("active"); 
+      setActiveMode('evil'); 
       modeUnlocked.evil = true;
       alert("Evil Mode aktiviert!");
     }, 800);
@@ -302,29 +302,29 @@ function checkPassword() {
   }
 }
 
-// Klick auf Evil Mode Button
+
 evilBtn.addEventListener("click", () => {
   if (evilBtn.classList.contains("locked")) {
     showPasswordPrompt();
   } else {
-    // Toggle aktiv/inaktiv für Evil Mode wenn entsperrt
+    
     if (evilBtn.classList.contains("active")) {
       evilBtn.classList.remove("active");
       evilUnlocked = false;
       sessionStorage.removeItem(SESSION_KEY);
       lockEvilMode();
-      setActiveMode('johann'); // zurück zu Johann wenn deaktiviert
+      setActiveMode('johann'); 
       alert("Evil Mode deaktiviert!");
     } else {
       evilBtn.classList.add("active");
       evilUnlocked = true;
-      setActiveMode('evil'); // aktivieren
+      setActiveMode('evil'); 
       alert("Evil Mode aktiviert!");
     }
   }
 });
 
-// Wenn du andere Modes klickst, um Evil Mode zu umgehen, setze Modus korrekt
+
 modeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     const mode = btn.dataset.mode;
@@ -336,15 +336,15 @@ modeButtons.forEach(btn => {
   });
 });
 
-// Beim Klick auf Senden prüfen, ob Evil Mode unlocked ist
+
 sendBtn.addEventListener('click', () => {
   if (!evilUnlocked && evilBtn.classList.contains('active')) {
-    // Evil Mode aktiv aber nicht unlocked → zurücksetzen
+    
     evilBtn.classList.remove('active');
     lockEvilMode();
     setActiveMode('johann');
   }
-  // Hier kannst du deinen Chat-Send-Code weiter ausführen...
+  
 });
 
 submitBtn.addEventListener("click", checkPassword);
@@ -361,5 +361,5 @@ window.addEventListener("keydown", e => {
   }
 });
 
-// Initial prüfen
+
 checkUnlockStatus();
