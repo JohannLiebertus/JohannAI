@@ -28,32 +28,65 @@ userInput.addEventListener("keypress", (e) => {
 
 function sendMessage() {
   const text = userInput.value.trim();
-  if (!text) return;
+  const imageInput = document.getElementById("image-input");
+  const imageFile = imageInput.files[0];
 
-  addMessage("user", text);
+  if (!text && !imageFile) return;
+
+  addMessage("user", text || "[Bild hochgeladen]");
   userInput.value = "";
+  imageInput.value = ""; // Reset File Input
 
-  fetch(`${API_URL}/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      history: chatHistory,
-      mode: currentMode,
-      message: text // message auch mitgeben, falls nötig
-    }),
-  })
-    .then(res => {
-      if (!res.ok) throw new Error(`Serverfehler: ${res.status}`);
-      return res.json();
+  // Mit Bild: POST an /chat-image
+  if (imageFile) {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    formData.append("text", text);
+    formData.append("mode", currentMode);
+
+    fetch(`${API_URL}/chat-image`, {
+      method: "POST",
+      body: formData
     })
-    .then(data => {
-      const reply = data.response || "Keine Antwort vom Bot.";
-      addMessage("bot", reply);
+      .then(async (res) => {
+        const contentType = res.headers.get("content-type");
+        if (!res.ok) throw new Error(`Fehler ${res.status}`);
+        if (contentType.includes("application/json")) {
+          const data = await res.json();
+          addMessage("bot", data.response || "Keine Antwort vom Bot.");
+        } else {
+          throw new Error("Unerwartete Antwort vom Server.");
+        }
+      })
+      .catch(err => {
+        addMessage("error", "Fehler: " + err.message);
+      });
+
+  } else {
+    // Nur Text
+    fetch(`${API_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        history: chatHistory,
+        mode: currentMode,
+        message: text
+      }),
     })
-    .catch(err => {
-      addMessage("error", "Fehler: " + err.message);
-    });
+      .then(res => {
+        if (!res.ok) throw new Error(`Serverfehler: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const reply = data.response || "Keine Antwort vom Bot.";
+        addMessage("bot", reply);
+      })
+      .catch(err => {
+        addMessage("error", "Fehler: " + err.message);
+      });
+  }
 }
+
 
 function addMessage(role, content) {
   const msg = document.createElement("div");
