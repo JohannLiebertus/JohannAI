@@ -15,15 +15,15 @@
     .version-text{font-size:.85rem;color:#888}
     #image-input{color:#fff}
 
-    
+    /* Evil Mode Locked Style */
     .mode-btn.evil.locked {
       filter: blur(2px);
       cursor: default;
-      pointer-events: none; 
-      color: transparent; 
+      pointer-events: none; /* Kein Klick solange gesperrt */
+      color: transparent; /* Text unsichtbar */
     }
 
-    
+    /* Schloss-Overlay über Evil Mode Button */
     .mode-btn.evil.locked::after {
       content: "🔒 Es ist verschlossen";
       position: absolute;
@@ -39,7 +39,7 @@
       text-shadow: 0 0 5px black;
     }
 
-    
+    /* Overlay */
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -106,7 +106,7 @@
       display: none;
     }
 
-    
+    /* Close X Button */
     .popup .close-btn {
       position: absolute;
       top: 8px;
@@ -166,15 +166,12 @@
 </div>
 
 <div class="extra-buttons">
-  <button class="extra mode-btn evil locked" onclick="showPasswordPrompt()">
-    <span class="lock-icon">🔒</span>
-    Evil Mode
-  </button>
   <button class="extra" id="clear-btn">Clear</button>
 </div>
 
 
-    
+
+    <!-- Password Overlay -->
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
@@ -188,27 +185,32 @@
   </div>
 
   <script>
-    const overlay = document.getElementById("overlay");
-const evilBtn = document.querySelector(".mode-btn.evil");  
+const overlay = document.getElementById("overlay");
+const evilBtn = document.querySelector(".mode-btn.evil");  // Dein Evil Mode Button
 const passwordInput = document.getElementById("evilPassword");
 const passwordMsg = document.getElementById("passwordMsg");
 const closePopupBtn = document.getElementById("closePopup");
 const submitBtn = document.getElementById("submitPassword");
 
+// Zusätzliche Variable, um zu merken ob unlocked
+let evilUnlocked = false;
+
 const SESSION_KEY = "evilModeUnlocked";
 
 function checkUnlockStatus() {
   if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    evilUnlocked = true;
     unlockEvilMode();
   } else {
+    evilUnlocked = false;
     lockEvilMode();
   }
 }
 
 function lockEvilMode() {
   evilBtn.classList.add("locked");
- 
-  evilBtn.style.pointerEvents = "auto"; 
+  evilBtn.classList.remove("active"); // Evil Mode darf nicht aktiv sein, wenn gesperrt
+  evilBtn.style.pointerEvents = "auto"; // Popup soll ja öffnen
 }
 
 function unlockEvilMode() {
@@ -216,6 +218,7 @@ function unlockEvilMode() {
   evilBtn.style.filter = "none";
   evilBtn.style.color = "#fff";
   evilBtn.style.pointerEvents = "auto";
+  evilUnlocked = true;
 }
 
 function showPasswordPrompt() {
@@ -228,6 +231,11 @@ function showPasswordPrompt() {
 
 function closePasswordPrompt() {
   overlay.classList.add("hidden");
+
+  // Wenn noch nicht unlocked, Evil Mode Button deaktivieren falls aktiv
+  if (!evilUnlocked) {
+    evilBtn.classList.remove("active");
+  }
 }
 
 function checkPassword() {
@@ -240,6 +248,7 @@ function checkPassword() {
     setTimeout(() => {
       closePasswordPrompt();
       unlockEvilMode();
+      evilBtn.classList.add("active"); // direkt aktivieren nach Freischaltung
       alert("Evil Mode aktiviert!");
     }, 800);
   } else {
@@ -248,17 +257,26 @@ function checkPassword() {
   }
 }
 
-
+// Klick auf Evil Mode Button
 evilBtn.addEventListener("click", () => {
   if (evilBtn.classList.contains("locked")) {
     showPasswordPrompt();
   } else {
-    alert("Evil Mode ist bereits aktiviert!");
+    // Toggle aktiv/inaktiv für Evil Mode wenn entsperrt
+    if (evilBtn.classList.contains("active")) {
+      evilBtn.classList.remove("active");
+      evilUnlocked = false;
+      sessionStorage.removeItem(SESSION_KEY);
+      lockEvilMode();
+      alert("Evil Mode deaktiviert!");
+    } else {
+      evilBtn.classList.add("active");
+      alert("Evil Mode aktiviert!");
+    }
   }
 });
 
 submitBtn.addEventListener("click", checkPassword);
-
 closePopupBtn.addEventListener("click", closePasswordPrompt);
 
 passwordInput.addEventListener("keydown", e => {
@@ -272,8 +290,9 @@ window.addEventListener("keydown", e => {
   }
 });
 
-
+// Initial prüfen
 checkUnlockStatus();
+
 
   </script>
 
