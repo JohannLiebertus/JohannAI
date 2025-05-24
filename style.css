@@ -747,35 +747,6 @@ body.dark-mode .extra {
   box-shadow: 0 6px 8px rgba(255, 0, 0, 0.8);
 }
 
-.mode-btn.evil.locked {
-  position: relative;
-  color: white;
-  background-color: rgba(139, 0, 0, 0.6);
-  border-radius: 10px;
-  padding: 10px 20px;
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: not-allowed;
-  backdrop-filter: blur(4px);
-  border: 2px solid #5A0000;
-  box-shadow: 0 4px 6px rgba(139, 0, 0, 0.6);
-  overflow: visible;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mode-btn.evil.locked .lock-icon {
-  position: absolute;
-  top: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.7rem;
-  color: white;
-  pointer-events: none;
-  text-shadow: 0 0 5px black;
-  z-index: 10;
-}
 
 
 
