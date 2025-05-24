@@ -647,3 +647,53 @@ body.dark-mode .extra {
   box-shadow: 0 3px 7px rgba(33, 136, 56, 0.8);
   transform: translateY(1px);
 }
+
+.mode-switch {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  justify-content: center;
+}
+
+.mode-btn {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #444;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+.mode-btn.active {
+  background: #007bff;
+}
+
+
+.bot-msg-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.bot-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.bot-text {
+  background: var(--bot-bg, #eee);
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 80%;
+  white-space: pre-wrap;
+}
+
+
+
+
