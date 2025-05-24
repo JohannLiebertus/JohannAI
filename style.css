@@ -695,7 +695,7 @@ body.dark-mode .extra {
 }
 
 .chat-msg.bot {
-  background-color: #007bff; /* Bot = Blau */
+  background-color: #007bff;
   color: white;
   padding: 10px 14px;
   border-radius: 12px;
@@ -709,6 +709,7 @@ body.dark-mode .extra {
   border-radius: 12px;
   max-width: 70%;
 }
+
 
 
 
