@@ -23,7 +23,7 @@ modeButtons.forEach(btn=>{
 
 /* ---------- Senden ---------- */
 sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress",e=>{
+userInput.addEventListener("keypress", e=>{
   if(e.key==="Enter") sendMessage();
 });
 
@@ -34,7 +34,15 @@ function sendMessage(){
   if(!text && !imageFile) return;
 
   /* Nachricht im Chatfenster zeigen */
-  addMessage("user", text || "[Bild gesendet]");
+  if(imageFile){
+    // Bild direkt anzeigen
+    const imgUrl = URL.createObjectURL(imageFile);
+    addImageMessage("user", imgUrl);
+  }
+
+  if(text){
+    addMessage("user", text);
+  }
 
   /* Daten vorbereiten */
   if(imageFile){               // → Bildroute
@@ -72,27 +80,44 @@ async function handleResponse(res){
 }
 
 /* ---------- Chat-Utility ---------- */
-function addMessage(role,content){
+function addMessage(role, content){
   const msg = document.createElement("div");
   msg.className = `chat-msg ${role}`;
   msg.textContent = content;
   chatDisplay.appendChild(msg);
 
-  if(role==="user"||role==="bot") chatHistory.push({role,content});
+  if(role === "user" || role === "bot") chatHistory.push({role, content});
+  chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+
+function addImageMessage(role, imgUrl){
+  const msg = document.createElement("div");
+  msg.className = `chat-msg ${role}`;
+
+  const img = document.createElement("img");
+  img.src = imgUrl;
+  img.style.maxWidth = "200px";
+  img.style.borderRadius = "8px";
+  img.style.marginBottom = "4px";
+
+  msg.appendChild(img);
+  chatDisplay.appendChild(msg);
+
+  if(role === "user") chatHistory.push({role, content: `[Bild] ${imgUrl}`});
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
 /* ---------- Clear ---------- */
-clearBtn.addEventListener("click",()=>{
-  chatDisplay.innerHTML="";
-  chatHistory=[];
+clearBtn.addEventListener("click", ()=>{
+  chatDisplay.innerHTML = "";
+  chatHistory = [];
 });
 
 /* ---------- Dark-Mode ---------- */
 function updateThemeIcon(){
   themeIcon.textContent = themeCheckbox.checked ? "🌞" : "🌙";
 }
-themeCheckbox.addEventListener("change",()=>{
+themeCheckbox.addEventListener("change", ()=>{
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
   updateThemeIcon();
 });
