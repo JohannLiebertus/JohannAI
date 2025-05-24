@@ -16,29 +16,45 @@
     #image-input{color:#fff}
 
     /* Evil Mode Locked Style */
+/* Evil Mode Locked Style */
     .mode-btn.evil.locked {
+      position: relative;
       cursor: not-allowed;
       filter: blur(2px);
       color: transparent;
-      /* pointer-events: none;  <-- entfernen */
-    }
+      background: #222;
+      pointer-events: none;
+}
 
-
-    /* Schloss-Overlay über Evil Mode Button */
-    .mode-btn.evil.locked::after {
-      content: "🚨Evil Mode🚨";
+/* Schloss-Overlay (sichtbar trotz Blur) */
+    .mode-btn.evil.locked::before {
+      content: "🔒";
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      font-size: 1.6rem;
       color: white;
-      font-weight: bold;
-      font-size: 14px;
+      filter: none;
+      text-shadow: 0 0 5px black;
       pointer-events: none;
       user-select: none;
-      white-space: nowrap;
-      text-shadow: 0 0 5px black;
-    }
+}
+
+/* Zusätzliches Label "Evil Mode" darunter */
+    .mode-btn.evil.locked::after {
+      content: "Evil Mode";
+      position: absolute;
+      top: 70%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 0.75rem;
+      text-shadow: 0 0 3px black;
+      pointer-events: none;
+      user-select: none;
+}
+
 
     /* Overlay */
     .overlay {
