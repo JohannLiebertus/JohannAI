@@ -134,7 +134,7 @@ function sendMessage() {
 
   // ⛔ Evil-Mode blockieren, wenn nicht freigeschaltet
   if (currentMode === "evil" && !modeUnlocked?.evil) {
-    addMessage("bot", "Zugriff auf Evil-Mode verweigert. Bitte zuerst freischalten.");
+    addMessage("bot", "🚨enter password before you use Evil Mode🚨");
     return;
   }
 
@@ -241,21 +241,26 @@ function checkUnlockStatus() {
 }
 
 function lockEvilMode() {
+  evilBtn.classList.remove("unlocked"); // 🔒 zurücksetzen
   evilBtn.classList.add("locked");
-  evilBtn.classList.remove("active"); // Evil Mode darf nicht aktiv sein, wenn gesperrt
-  evilBtn.style.pointerEvents = "auto"; // Popup soll ja öffnen
+
+  evilBtn.classList.remove("active");
+  evilBtn.style.pointerEvents = "auto";
   evilBtn.style.filter = "blur(2px)";
   evilBtn.style.color = "transparent";
-  evilBtn.style.position = "relative";
 }
+
 
 function unlockEvilMode() {
   evilBtn.classList.remove("locked");
+  evilBtn.classList.add("unlocked"); // 🔓 hinzugefügt
+
   evilBtn.style.filter = "none";
   evilBtn.style.color = "#fff";
   evilBtn.style.pointerEvents = "auto";
   evilUnlocked = true;
 }
+
 
 function showPasswordPrompt() {
   passwordInput.value = "";
