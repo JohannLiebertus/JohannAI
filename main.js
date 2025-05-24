@@ -12,6 +12,16 @@ const themeIcon     = document.getElementById("theme-icon");
 let currentMode  = "johann";
 let chatHistory  = [];
 
+const modeAvatars = {
+  johann: "johann.png",
+  rizz: "rizz.png",
+  classic: "gpt.png",
+  coding: "code.png",
+  mental: "doc.png",
+  human: "human.png"
+};
+
+
 const modePrompts = {
   johann: "",
   rizz: `Du bist Rizz AI, ein charmanter und cleverer Flirt-Coach. Wenn dir jemand eine Nachricht schreibt, liest du sie erst einmal als Beobachter und gibst eine kurze Einschätzung dazu, wie diese Nachricht auf eine andere Person wirken könnte (d.h. was die dritte Person denken oder fühlen würde). Danach gibst du eine knackige, smarte Antwort, die der Nutzer als beste Erwiderung auf die Nachricht senden kann, um maximalen "Rizz" zu haben – also charmant, witzig, locker und sympathisch zu wirken.
@@ -142,10 +152,12 @@ function addMessage(role, content) {
 
   const profilePic = document.createElement("img");
   profilePic.className = "profile-pic";
+
+  // Nur für den Bot: Bild je nach Modus anzeigen
   if (role === "bot") {
-    profilePic.src = "johann.png"; // dein Bildname
+    profilePic.src = modeAvatars[currentMode] || "default.png";
   } else {
-    profilePic.style.display = "none"; // Kein Icon für User
+    profilePic.style.display = "none";
   }
 
   const msg = document.createElement("div");
@@ -159,6 +171,7 @@ function addMessage(role, content) {
   if (role === "user" || role === "bot") chatHistory.push({ role, content });
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
+
 
 
 
