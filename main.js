@@ -8,6 +8,12 @@ const clearBtn      = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
 const modeButtons   = document.querySelectorAll(".mode-btn");
 const themeIcon     = document.getElementById("theme-icon");
+const overlay = document.getElementById("overlay");
+const evilBtn = document.querySelector(".mode-btn.evil");  
+const passwordInput = document.getElementById("evilPassword");
+const passwordMsg = document.getElementById("passwordMsg");
+const closePopupBtn = document.getElementById("closePopup");
+const submitBtn = document.getElementById("submitPassword");
 
 let currentMode  = "johann";
 let chatHistory  = [];
@@ -199,3 +205,146 @@ themeCheckbox.addEventListener("change", () => {
 });
 updateThemeIcon();
 
+
+// Zusätzliche Variable, um zu merken ob unlocked
+let evilUnlocked = false;
+
+const SESSION_KEY = "evilModeUnlocked";
+
+function setActiveMode(modeName) {
+  modeButtons.forEach(btn => {
+    if (btn.dataset.mode === modeName) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function checkUnlockStatus() {
+  if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    evilUnlocked = true;
+    unlockEvilMode();
+  } else {
+    evilUnlocked = false;
+    lockEvilMode();
+  }
+}
+
+function lockEvilMode() {
+  evilBtn.classList.add("locked");
+  evilBtn.classList.remove("active"); // Evil Mode darf nicht aktiv sein, wenn gesperrt
+  evilBtn.style.pointerEvents = "auto"; // Popup soll ja öffnen
+  evilBtn.style.filter = "blur(2px)";
+  evilBtn.style.color = "transparent";
+  evilBtn.style.position = "relative";
+}
+
+function unlockEvilMode() {
+  evilBtn.classList.remove("locked");
+  evilBtn.style.filter = "none";
+  evilBtn.style.color = "#fff";
+  evilBtn.style.pointerEvents = "auto";
+  evilUnlocked = true;
+}
+
+function showPasswordPrompt() {
+  passwordInput.value = "";
+  passwordMsg.textContent = "";
+  passwordMsg.className = "password-msg";
+  overlay.classList.remove("hidden");
+  passwordInput.focus();
+}
+
+function closePasswordPrompt() {
+  overlay.classList.add("hidden");
+
+  // Wenn noch nicht unlocked, Evil Mode Button deaktivieren falls aktiv und zurück zu 'johann'
+  if (!evilUnlocked) {
+    evilBtn.classList.remove("active");
+    lockEvilMode();
+    setActiveMode('johann'); // zurück zu Johann wechseln
+  }
+}
+
+function checkPassword() {
+  const entered = passwordInput.value.trim();
+  if (entered === "vape") {
+    passwordMsg.textContent = "Successful!";
+    passwordMsg.className = "password-msg success";
+    sessionStorage.setItem(SESSION_KEY, "true");
+
+    setTimeout(() => {
+      closePasswordPrompt();
+      unlockEvilMode();
+      evilBtn.classList.add("active"); // direkt aktivieren nach Freischaltung
+      setActiveMode('evil'); // Evil Mode aktiv markieren
+      alert("Evil Mode aktiviert!");
+    }, 800);
+  } else {
+    passwordMsg.textContent = "Wrong password!";
+    passwordMsg.className = "password-msg error";
+  }
+}
+
+// Klick auf Evil Mode Button
+evilBtn.addEventListener("click", () => {
+  if (evilBtn.classList.contains("locked")) {
+    showPasswordPrompt();
+  } else {
+    // Toggle aktiv/inaktiv für Evil Mode wenn entsperrt
+    if (evilBtn.classList.contains("active")) {
+      evilBtn.classList.remove("active");
+      evilUnlocked = false;
+      sessionStorage.removeItem(SESSION_KEY);
+      lockEvilMode();
+      setActiveMode('johann'); // zurück zu Johann wenn deaktiviert
+      alert("Evil Mode deaktiviert!");
+    } else {
+      evilBtn.classList.add("active");
+      evilUnlocked = true;
+      setActiveMode('evil'); // aktivieren
+      alert("Evil Mode aktiviert!");
+    }
+  }
+});
+
+// Wenn du andere Modes klickst, um Evil Mode zu umgehen, setze Modus korrekt
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    if (mode === 'evil' && evilBtn.classList.contains('locked')) {
+      showPasswordPrompt();
+      return;
+    }
+    setActiveMode(mode);
+  });
+});
+
+// Beim Klick auf Senden prüfen, ob Evil Mode unlocked ist
+sendBtn.addEventListener('click', () => {
+  if (!evilUnlocked && evilBtn.classList.contains('active')) {
+    // Evil Mode aktiv aber nicht unlocked → zurücksetzen
+    evilBtn.classList.remove('active');
+    lockEvilMode();
+    setActiveMode('johann');
+  }
+  // Hier kannst du deinen Chat-Send-Code weiter ausführen...
+});
+
+submitBtn.addEventListener("click", checkPassword);
+closePopupBtn.addEventListener("click", closePasswordPrompt);
+
+passwordInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") checkPassword();
+  if (e.key === "Escape") closePasswordPrompt();
+});
+
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
+    closePasswordPrompt();
+  }
+});
+
+// Initial prüfen
+checkUnlockStatus();
