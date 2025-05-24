@@ -15,15 +15,15 @@
     .version-text{font-size:.85rem;color:#888}
     #image-input{color:#fff}
 
-    /* Evil Mode Locked Style */
+    
     .mode-btn.evil.locked {
       filter: blur(2px);
       cursor: default;
-      pointer-events: none; /* Kein Klick solange gesperrt */
-      color: transparent; /* Text unsichtbar */
+      pointer-events: none; 
+      color: transparent; 
     }
 
-    /* Schloss-Overlay über Evil Mode Button */
+    
     .mode-btn.evil.locked::after {
       content: "🔒 Es ist verschlossen";
       position: absolute;
@@ -39,7 +39,7 @@
       text-shadow: 0 0 5px black;
     }
 
-    /* Overlay */
+    
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -106,7 +106,7 @@
       display: none;
     }
 
-    /* Close X Button */
+    
     .popup .close-btn {
       position: absolute;
       top: 8px;
@@ -174,7 +174,7 @@
 </div>
 
 
-    <!-- Password Overlay -->
+    
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
@@ -189,7 +189,7 @@
 
   <script>
     const overlay = document.getElementById("overlay");
-const evilBtn = document.querySelector(".mode-btn.evil");  // bestehender Evil Mode Button
+const evilBtn = document.querySelector(".mode-btn.evil");  
 const passwordInput = document.getElementById("evilPassword");
 const passwordMsg = document.getElementById("passwordMsg");
 const closePopupBtn = document.getElementById("closePopup");
@@ -207,8 +207,8 @@ function checkUnlockStatus() {
 
 function lockEvilMode() {
   evilBtn.classList.add("locked");
-  // Durch CSS wird der Button verschwommen und das Schloss angezeigt
-  evilBtn.style.pointerEvents = "auto";  // Klickbar für Popup
+ 
+  evilBtn.style.pointerEvents = "auto"; 
 }
 
 function unlockEvilMode() {
@@ -248,7 +248,7 @@ function checkPassword() {
   }
 }
 
-// Button Klick öffnet Popup, wenn locked
+
 evilBtn.addEventListener("click", () => {
   if (evilBtn.classList.contains("locked")) {
     showPasswordPrompt();
@@ -272,7 +272,7 @@ window.addEventListener("keydown", e => {
   }
 });
 
-// Beim Laden prüfen
+
 checkUnlockStatus();
 
   </script>
