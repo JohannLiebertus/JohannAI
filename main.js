@@ -140,33 +140,26 @@ function addMessage(role, content) {
   const msgWrapper = document.createElement("div");
   msgWrapper.className = `chat-msg-wrapper ${role}`;
 
+  const profilePic = document.createElement("img");
+  profilePic.className = "profile-pic";
   if (role === "bot") {
-    const avatar = document.createElement("img");
-    avatar.src = "johann.png";
-    avatar.className = "chat-avatar";
-
-    const msg = document.createElement("div");
-    msg.className = `chat-msg ${role}`;
-    msg.textContent = content;
-
-    msgWrapper.appendChild(avatar);
-    msgWrapper.appendChild(msg);
+    profilePic.src = "johann.png"; // dein Bildname
   } else {
-    const msg = document.createElement("div");
-    msg.className = `chat-msg ${role}`;
-    msg.textContent = content;
-
-    msgWrapper.appendChild(msg);
+    profilePic.style.display = "none"; // Kein Icon für User
   }
 
+  const msg = document.createElement("div");
+  msg.className = `chat-msg ${role}`;
+  msg.textContent = content;
+
+  msgWrapper.appendChild(profilePic);
+  msgWrapper.appendChild(msg);
   chatDisplay.appendChild(msgWrapper);
 
-  if (role === "user" || role === "bot") {
-    chatHistory.push({ role, content });
-  }
-
+  if (role === "user" || role === "bot") chatHistory.push({ role, content });
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
+
 
 
 /* ---------- Server-Antwort ---------- */
