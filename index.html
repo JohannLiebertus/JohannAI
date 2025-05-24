@@ -54,7 +54,7 @@
       color: #fff;
     }
 
-    /* EVIL MODE: Blur */
+    
     .mode-btn.evil.locked {
       position: relative;
       filter: blur(3px);
@@ -63,7 +63,7 @@
       pointer-events: none;
     }
 
-    /* Extra Schloss-Overlay, NICHT im Button */
+    
     .lock-icon-overlay {
       position: absolute;
       font-size: 1.6rem;
@@ -75,7 +75,7 @@
       transform: translate(-50%, -50%);
     }
 
-    /* Overlay */
+    
     .overlay {
       position: fixed;
       top: 0;
@@ -197,10 +197,10 @@
       <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
       <button class="mode-btn" data-mode="human">Human AI 👤</button>
 
-      <!-- EVIL MODE Button (blurred) -->
+      
       <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
 
-      <!-- Sharp lock overlay -->
+      
       <span id="evilLock" class="lock-icon-overlay">🔒</span>
     </div>
 
@@ -208,7 +208,7 @@
       <button class="extra" id="clear-btn">Clear</button>
     </div>
 
-    <!-- Password Overlay -->
+    
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
