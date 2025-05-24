@@ -136,25 +136,38 @@ function addMessage(role, content) {
 }
 
 
-function addImageMessage(role, imgUrl) {
-  const msg = document.createElement("div");
-  msg.className = `chat-msg ${role}`;
+function addMessage(role, content) {
+  const msgWrapper = document.createElement("div");
+  msgWrapper.className = `chat-msg-wrapper ${role}`;
 
-  const img = document.createElement("img");
-  img.src = imgUrl;
-  img.style.maxWidth = "200px";
-  img.style.borderRadius = "8px";
-  img.style.marginBottom = "4px";
+  if (role === "bot") {
+    const avatar = document.createElement("img");
+    avatar.src = "johann.png";
+    avatar.className = "chat-avatar";
 
-  msg.appendChild(img);
-  chatDisplay.appendChild(msg);
+    const msg = document.createElement("div");
+    msg.className = `chat-msg ${role}`;
+    msg.textContent = content;
 
-  if (role === "user" && currentMode !== "johann") {
-    chatHistory.push({ role, content: `[Bild] ${imgUrl}` });
+    msgWrapper.appendChild(avatar);
+    msgWrapper.appendChild(msg);
+  } else {
+    const msg = document.createElement("div");
+    msg.className = `chat-msg ${role}`;
+    msg.textContent = content;
+
+    msgWrapper.appendChild(msg);
+  }
+
+  chatDisplay.appendChild(msgWrapper);
+
+  if (role === "user" || role === "bot") {
+    chatHistory.push({ role, content });
   }
 
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
+
 
 /* ---------- Server-Antwort ---------- */
 async function handleResponse(res) {
