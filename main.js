@@ -1,17 +1,16 @@
-const API_URL = "https://johannai.onrender.com"; // ✅ korrekt
+const API_URL = "https://johannai.onrender.com";
 
 const sendBtn = document.getElementById("send-btn");
 const userInput = document.getElementById("user-input");
+const imageInput = document.getElementById("image-input");
 const chatDisplay = document.getElementById("chat-display");
 const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
 const modeButtons = document.querySelectorAll(".mode-btn");
-const themeIcon = document.getElementById("theme-icon");
 
 let currentMode = "johann";
 let chatHistory = [];
 
-// Mode Buttons
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentMode = btn.dataset.mode;
@@ -20,7 +19,6 @@ modeButtons.forEach(btn => {
   });
 });
 
-// Send Message on Button Click or Enter
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
@@ -28,24 +26,25 @@ userInput.addEventListener("keypress", (e) => {
 
 function sendMessage() {
   const text = userInput.value.trim();
-  if (!text) return;
+  const imageFile = imageInput.files[0];
 
-  addMessage("user", text);
-  userInput.value = "";
+  if (!text && !imageFile) return;
 
-  fetch(`${API_URL}/chat`, {
+  const formData = new FormData();
+  formData.append("text", text);
+  formData.append("mode", currentMode);
+  formData.append("history", JSON.stringify(chatHistory));
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  addMessage("user", text || "[Bild gesendet]");
+
+  fetch(`${API_URL}/chat-image`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      history: chatHistory,
-      mode: currentMode,
-      message: text // message auch mitgeben, falls nötig
-    }),
+    body: formData,
   })
-    .then(res => {
-      if (!res.ok) throw new Error(`Serverfehler: ${res.status}`);
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
       const reply = data.response || "Keine Antwort vom Bot.";
       addMessage("bot", reply);
@@ -53,6 +52,9 @@ function sendMessage() {
     .catch(err => {
       addMessage("error", "Fehler: " + err.message);
     });
+
+  userInput.value = "";
+  imageInput.value = null;
 }
 
 function addMessage(role, content) {
@@ -68,27 +70,11 @@ function addMessage(role, content) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-// Clear Button
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
   chatHistory = [];
 });
 
-// Theme Toggle & Icon wechseln
-function updateThemeIcon() {
-  if (themeCheckbox.checked) {
-    // Dark Mode an → Sonne anzeigen
-    themeIcon.textContent = '🌞';
-  } else {
-    // Light Mode an → Mond anzeigen
-    themeIcon.textContent = '🌙';
-  }
-}
-
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
-  updateThemeIcon();
 });
-
-// Icon initial setzen
-updateThemeIcon();
