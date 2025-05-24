@@ -152,19 +152,27 @@
       <button id="send-btn" class="send-btn">Senden</button>
     </div>
 
-    <div class="mode-switch">
-      <button class="mode-btn active" data-mode="johann">😈 Johann</button>
-      <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-      <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-      <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-      <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-      <button class="mode-btn" data-mode="human">Human AI 👤</button>
-      <button id="evilBtn" class="mode-btn evil locked">Evil Mode</button>
-    </div>
+<div class="mode-switch">
+  <button class="mode-btn active" data-mode="johann">😈 Johann</button>
+  <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+  <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+  <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+  <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+  <button class="mode-btn" data-mode="human">Human AI 👤</button>
+  <button class="mode-btn evil locked" data-mode="evil">
+    <span class="lock-icon">🔒</span>
+    Evil Mode
+  </button>
+</div>
 
-    <div class="extra-buttons">
-      <button class="extra" id="clear-btn">Clear</button>
-    </div>
+<div class="extra-buttons">
+  <button class="extra mode-btn evil locked" onclick="showPasswordPrompt()">
+    <span class="lock-icon">🔒</span>
+    Evil Mode
+  </button>
+  <button class="extra" id="clear-btn">Clear</button>
+</div>
+
 
     <!-- Password Overlay -->
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
