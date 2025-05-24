@@ -17,15 +17,16 @@
 
     /* Evil Mode Locked Style */
     .mode-btn.evil.locked {
+      cursor: not-allowed;
       filter: blur(2px);
-      cursor: default;
-      pointer-events: none; /* Kein Klick solange gesperrt */
-      color: transparent; /* Text unsichtbar */
+      color: transparent;
+      /* pointer-events: none;  <-- entfernen */
     }
+
 
     /* Schloss-Overlay über Evil Mode Button */
     .mode-btn.evil.locked::after {
-      content: "🔒 Es ist verschlossen";
+      content: "🚨Evil Mode🚨";
       position: absolute;
       top: 50%;
       left: 50%;
