@@ -41,11 +41,17 @@
     <div class="chat-display" id="chat-display"></div>
 
     <!-- Text + Bild-Upload -->
-    <div class="input-section" style="gap:6px;flex-wrap:wrap">
-      <input type="file" id="image-input" accept="image/*" />
-      <input type="text" id="user-input" placeholder="Write..." />
-      <button class="send-btn" id="send-btn">Send</button>
-    </div>
+    <div class="input-section">
+  <input type="text" id="user-input" placeholder="Nachricht eingeben...">
+
+  <!-- Verstecktes Input -->
+  <input type="file" id="image-input" accept="image/*" style="display:none;">
+  <!-- Label als runder Button -->
+  <label for="image-input" class="file-btn" title="Bild anhängen">📎</label>
+
+  <button id="send-btn" class="send-btn">Senden</button>
+</div>
+
 
     <!-- Moduswahl -->
     <div class="mode-switch">
