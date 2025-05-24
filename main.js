@@ -19,7 +19,7 @@ const modeAvatars = {
   coding: "code.png",
   mental: "doc.png",
   human: "human.png",
-  evil: "evil.png"  // Falls du ein Avatar-Bild für evil möchtest
+  evil: "evil.png"
 };
 
 const modePrompts = {
@@ -61,6 +61,43 @@ modeButtons.forEach(btn => {
     }
   });
 });
+
+/* ---------- Nachricht hinzufügen ---------- */
+function addMessage(role, text, isImage = false) {
+  const msgWrapper = document.createElement("div");
+  msgWrapper.className = `chat-msg-wrapper ${role}`;
+
+  const profilePic = document.createElement("img");
+  profilePic.className = "profile-pic";
+
+  if (role === "bot") {
+    profilePic.src = modeAvatars[currentMode] || "default.png";
+  } else {
+    profilePic.style.display = "none";
+  }
+
+  const msg = document.createElement("div");
+  msg.className = `chat-msg ${role}`;
+
+  if (isImage) {
+    const img = document.createElement("img");
+    img.src = text;
+    img.style.maxWidth = "150px";
+    img.style.maxHeight = "150px";
+    img.style.borderRadius = "8px";
+    msg.appendChild(img);
+  } else {
+    msg.textContent = text;
+  }
+
+  msgWrapper.appendChild(profilePic);
+  msgWrapper.appendChild(msg);
+  chatDisplay.appendChild(msgWrapper);
+
+  chatHistory.push({ role, content: isImage ? "[Bild]" : text });
+
+  chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
 
 /* ---------- Senden ---------- */
 sendBtn.addEventListener("click", sendMessage);
@@ -114,38 +151,6 @@ function sendMessage() {
   userInput.value = "";
   imageInput.value = "";
 }
-
-function addImageMessage(role, imgUrl) {
-  const msgWrapper = document.createElement("div");
-  msgWrapper.className = `chat-msg-wrapper ${role}`;
-
-  const profilePic = document.createElement("img");
-  profilePic.className = "profile-pic";
-
-  if (role === "bot") {
-    profilePic.src = modeAvatars[currentMode] || "default.png";
-  } else {
-    profilePic.style.display = "none";
-  }
-
-  const msg = document.createElement("div");
-  msg.className = `chat-msg ${role}`;
-
-  const img = document.createElement("img");
-  img.src = imgUrl;
-  img.style.maxWidth = "150px";     // Maximalbreite 150px
-  img.style.maxHeight = "150px";    // Maximalhöhe 150px
-  img.style.borderRadius = "8px";   // Schönere abgerundete Ecken optional
-
-  msg.appendChild(img);
-  msgWrapper.appendChild(profilePic);
-  msgWrapper.appendChild(msg);
-  chatDisplay.appendChild(msgWrapper);
-
-  if (role === "user" || role === "bot") chatHistory.push({ role, content: `[Bild]` });
-  chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
-
 
 /* ---------- Server-Antwort ---------- */
 async function handleResponse(res) {
