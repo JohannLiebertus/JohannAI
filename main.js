@@ -33,42 +33,61 @@ function sendMessage(){
 
   if(!text && !imageFile) return;
 
-  /* Nachricht im Chatfenster zeigen */
+  /* Bild anzeigen, wenn vorhanden */
   if(imageFile){
-    // Bild direkt anzeigen
     const imgUrl = URL.createObjectURL(imageFile);
     addImageMessage("user", imgUrl);
   }
 
+  /* Text anzeigen, wenn vorhanden */
   if(text){
     addMessage("user", text);
   }
 
-  /* Daten vorbereiten */
-  if(imageFile){               // → Bildroute
+  /* Daten vorbereiten und senden */
+  if(imageFile){
     const formData = new FormData();
     formData.append("image", imageFile);
     formData.append("text",  text);
     formData.append("mode",  currentMode);
     formData.append("history", JSON.stringify(chatHistory));
 
-    fetch(`${API_URL}/chat-image`,{method:"POST",body:formData})
+    fetch(`${API_URL}/chat-image`, { method: "POST", body: formData })
       .then(handleResponse)
-      .catch(err=>addMessage("error","Fehler: "+err.message));
-  }else{                       // → Nur Text
-    fetch(`${API_URL}/chat`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({history:chatHistory,mode:currentMode,message:text})
+      .catch(err => addMessage("error", "Fehler: " + err.message));
+  } else {
+    fetch(`${API_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history: chatHistory, mode: currentMode, message: text })
     })
       .then(handleResponse)
-      .catch(err=>addMessage("error","Fehler: "+err.message));
+      .catch(err => addMessage("error", "Fehler: " + err.message));
   }
 
   /* Eingabefelder leeren */
   userInput.value = "";
   imageInput.value = "";
 }
+
+function addImageMessage(role, imgUrl){
+  const msg = document.createElement("div");
+  msg.className = `chat-msg ${role}`;
+
+  const img = document.createElement("img");
+  img.src = imgUrl;
+  img.style.maxWidth = "200px";
+  img.style.borderRadius = "8px";
+  img.style.marginBottom = "6px";
+
+  msg.appendChild(img);
+  chatDisplay.appendChild(msg);
+
+  // Chat-History als Platzhaltertext
+  if(role === "user") chatHistory.push({ role, content: "[Bild gesendet]" });
+  chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+
 
 /* ---------- Server-Antwort ---------- */
 async function handleResponse(res){
