@@ -184,18 +184,30 @@
 
   </div>
 
-  <script>
+<script>
 const overlay = document.getElementById("overlay");
 const evilBtn = document.querySelector(".mode-btn.evil");  // Dein Evil Mode Button
 const passwordInput = document.getElementById("evilPassword");
 const passwordMsg = document.getElementById("passwordMsg");
 const closePopupBtn = document.getElementById("closePopup");
 const submitBtn = document.getElementById("submitPassword");
+const sendBtn = document.getElementById("send-btn");
+const modeButtons = document.querySelectorAll('.mode-btn');
 
 // Zusätzliche Variable, um zu merken ob unlocked
 let evilUnlocked = false;
 
 const SESSION_KEY = "evilModeUnlocked";
+
+function setActiveMode(modeName) {
+  modeButtons.forEach(btn => {
+    if (btn.dataset.mode === modeName) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
 
 function checkUnlockStatus() {
   if (sessionStorage.getItem(SESSION_KEY) === "true") {
@@ -211,6 +223,9 @@ function lockEvilMode() {
   evilBtn.classList.add("locked");
   evilBtn.classList.remove("active"); // Evil Mode darf nicht aktiv sein, wenn gesperrt
   evilBtn.style.pointerEvents = "auto"; // Popup soll ja öffnen
+  evilBtn.style.filter = "blur(2px)";
+  evilBtn.style.color = "transparent";
+  evilBtn.style.position = "relative";
 }
 
 function unlockEvilMode() {
@@ -232,9 +247,11 @@ function showPasswordPrompt() {
 function closePasswordPrompt() {
   overlay.classList.add("hidden");
 
-  // Wenn noch nicht unlocked, Evil Mode Button deaktivieren falls aktiv
+  // Wenn noch nicht unlocked, Evil Mode Button deaktivieren falls aktiv und zurück zu 'johann'
   if (!evilUnlocked) {
     evilBtn.classList.remove("active");
+    lockEvilMode();
+    setActiveMode('johann'); // zurück zu Johann wechseln
   }
 }
 
@@ -249,6 +266,7 @@ function checkPassword() {
       closePasswordPrompt();
       unlockEvilMode();
       evilBtn.classList.add("active"); // direkt aktivieren nach Freischaltung
+      setActiveMode('evil'); // Evil Mode aktiv markieren
       alert("Evil Mode aktiviert!");
     }, 800);
   } else {
@@ -268,12 +286,38 @@ evilBtn.addEventListener("click", () => {
       evilUnlocked = false;
       sessionStorage.removeItem(SESSION_KEY);
       lockEvilMode();
+      setActiveMode('johann'); // zurück zu Johann wenn deaktiviert
       alert("Evil Mode deaktiviert!");
     } else {
       evilBtn.classList.add("active");
+      evilUnlocked = true;
+      setActiveMode('evil'); // aktivieren
       alert("Evil Mode aktiviert!");
     }
   }
+});
+
+// Wenn du andere Modes klickst, um Evil Mode zu umgehen, setze Modus korrekt
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    if (mode === 'evil' && evilBtn.classList.contains('locked')) {
+      showPasswordPrompt();
+      return;
+    }
+    setActiveMode(mode);
+  });
+});
+
+// Beim Klick auf Senden prüfen, ob Evil Mode unlocked ist
+sendBtn.addEventListener('click', () => {
+  if (!evilUnlocked && evilBtn.classList.contains('active')) {
+    // Evil Mode aktiv aber nicht unlocked → zurücksetzen
+    evilBtn.classList.remove('active');
+    lockEvilMode();
+    setActiveMode('johann');
+  }
+  // Hier kannst du deinen Chat-Send-Code weiter ausführen...
 });
 
 submitBtn.addEventListener("click", checkPassword);
@@ -292,9 +336,8 @@ window.addEventListener("keydown", e => {
 
 // Initial prüfen
 checkUnlockStatus();
+</script>
 
-
-  </script>
 
   <script src="main.js"></script>
 </body>
