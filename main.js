@@ -17,6 +17,8 @@ const submitBtn = document.getElementById("submitPassword");
 
 let currentMode  = "johann";
 let chatHistory  = [];
+const modeUnlocked = { evil: false };
+
 
 const modeAvatars = {
   johann: "johann.png",
@@ -130,6 +132,12 @@ function sendMessage() {
     return;
   }
 
+  // ⛔ Evil-Mode blockieren, wenn nicht freigeschaltet
+  if (currentMode === "evil" && !modeUnlocked?.evil) {
+    addMessage("bot", "Zugriff auf Evil-Mode verweigert. Bitte zuerst freischalten.");
+    return;
+  }
+
   if (imageFile) {
     const imgUrl = URL.createObjectURL(imageFile);
     addMessage("user", imgUrl, true);
@@ -170,6 +178,7 @@ function sendMessage() {
   userInput.value = "";
   imageInput.value = "";
 }
+
 
 /* ---------- Server-Antwort ---------- */
 async function handleResponse(res) {
@@ -279,6 +288,7 @@ function checkPassword() {
       unlockEvilMode();
       evilBtn.classList.add("active"); // direkt aktivieren nach Freischaltung
       setActiveMode('evil'); // Evil Mode aktiv markieren
+      modeUnlocked.evil = true;
       alert("Evil Mode aktiviert!");
     }, 800);
   } else {
