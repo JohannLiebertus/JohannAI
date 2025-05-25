@@ -151,8 +151,23 @@ function sendMessage() {
   }
 
   if (text) {
-    addMessage("user", text);
+    if (currentMode === "evil") {
+      // Kein Hinzufügen zum Gedächtnis!
+      const msgWrapper = document.createElement("div");
+      msgWrapper.className = `chat-msg-wrapper user`;
+
+      const msg = document.createElement("div");
+      msg.className = `chat-msg user`;
+      msg.textContent = text;
+
+      msgWrapper.appendChild(msg);
+      chatDisplay.appendChild(msgWrapper);
+      chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    } else {
+      addMessage("user", text);
+    }
   }
+
 
   // 🧠 Immer den system prompt + Verlauf + aktuelle Nachricht mitsenden
   const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
@@ -204,7 +219,26 @@ async function handleResponse(res) {
     throw new Error("Keine JSON-Antwort");
   }
   const data = await res.json();
+  if (currentMode === "evil") {
+  const msgWrapper = document.createElement("div");
+  msgWrapper.className = `chat-msg-wrapper bot`;
+
+  const profilePic = document.createElement("img");
+  profilePic.className = "profile-pic";
+  profilePic.src = modeAvatars["evil"];
+
+  const msg = document.createElement("div");
+  msg.className = `chat-msg bot`;
+  msg.textContent = data.response || "Keine Antwort vom Bot.";
+
+  msgWrapper.appendChild(profilePic);
+  msgWrapper.appendChild(msg);
+  chatDisplay.appendChild(msgWrapper);
+  chatDisplay.scrollTop = chatDisplay.scrollHeight;
+} else {
   addMessage("bot", data.response || "Keine Antwort vom Bot.");
+}
+
 }
 
 clearBtn.addEventListener("click", () => {
