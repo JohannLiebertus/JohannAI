@@ -116,7 +116,10 @@ function addMessage(role, text, isImage = false) {
   msgWrapper.appendChild(msg);
   chatDisplay.appendChild(msgWrapper);
 
+  if (currentMode !== "evil") {
   chatHistory.push({ role, content: isImage ? "[Bild]" : text });
+}
+
 
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
@@ -154,7 +157,11 @@ function sendMessage() {
   // 🧠 Immer den system prompt + Verlauf + aktuelle Nachricht mitsenden
   const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
   const userMsg = { role: "user", content: text };
-  const historyToSend = [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
+
+  const historyToSend = currentMode === "evil"
+  ? [systemPrompt, userMsg] // ❌ Kein Gedächtnis für Evil
+  : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
+
 
   // 📤 Mit oder ohne Bild senden
   if (imageFile) {
