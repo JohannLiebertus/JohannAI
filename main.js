@@ -151,13 +151,12 @@ function sendMessage() {
     addMessage("user", text);
   }
 
-  let historyToSend;
-  if (currentMode === "evil") {
-    historyToSend = chatHistory.filter(msg => msg.role === "system"); 
-  } else {
-    historyToSend = chatHistory; 
-  }
+  // 🧠 Immer den system prompt + Verlauf + aktuelle Nachricht mitsenden
+  const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
+  const userMsg = { role: "user", content: text };
+  const historyToSend = [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
 
+  // 📤 Mit oder ohne Bild senden
   if (imageFile) {
     const formData = new FormData();
     formData.append("image", imageFile);
@@ -172,7 +171,11 @@ function sendMessage() {
     fetch(`${API_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ history: historyToSend, mode: currentMode, message: text })
+      body: JSON.stringify({
+        history: historyToSend,
+        mode: currentMode,
+        message: text
+      })
     })
       .then(handleResponse)
       .catch(err => addMessage("error", "Fehler: " + err.message));
@@ -181,6 +184,7 @@ function sendMessage() {
   userInput.value = "";
   imageInput.value = "";
 }
+
 
 async function handleResponse(res) {
   if (!res.ok) {
