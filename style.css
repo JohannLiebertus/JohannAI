@@ -747,6 +747,156 @@ body.dark-mode .extra {
   box-shadow: 0 6px 8px rgba(255, 0, 0, 0.8);
 }
 
+    .mode-switch {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+    }
 
+    .mode-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: #fff;
+      cursor: pointer;
+      font-size: .9rem;
+      position: relative;
+    }
+
+    .mode-btn.active {
+      background: #007bff;
+    }
+
+    #theme-icon {
+      font-size: 1.4rem;
+      margin-right: 8px;
+      user-select: none;
+    }
+
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .version-text {
+      font-size: .85rem;
+      color: #888;
+    }
+
+    #image-input {
+      color: #fff;
+    }
+
+    
+    .mode-btn.evil.locked {
+      position: relative;
+      filter: blur(3px);
+      color: transparent;
+      background: #222;
+      pointer-events: none;
+    }
+
+    
+    .lock-icon-overlay {
+      position: absolute;
+      font-size: 1.6rem;
+      color: white;
+      z-index: 10;
+      pointer-events: none;
+      text-shadow: 0 0 6px black;
+      user-select: none;
+      transform: translate(-50%, -50%);
+    }
+
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup {
+      background: #fff;
+      padding: 20px 20px 15px 20px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 300px;
+      width: 90%;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      color: #000;
+      position: relative;
+    }
+
+    .popup input[type="password"] {
+      padding: 8px;
+      width: 100%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .popup button.submit-btn {
+      padding: 8px 12px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .popup button.submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .password-msg {
+      font-weight: bold;
+      margin-top: 5px;
+      min-height: 1.3em;
+      font-size: 0.95rem;
+    }
+
+    .password-msg.error {
+      color: red;
+    }
+
+    .password-msg.success {
+      color: green;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .popup .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .popup .close-btn:hover {
+      color: #000;
+    }
 
 
