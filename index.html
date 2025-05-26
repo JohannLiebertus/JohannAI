@@ -7,68 +7,157 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    /* Bestehende Styles bleiben erhalten */
-
-    /* Modus-Fenster und Pfeil-Button */
-    .open-mode-btn {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0;
-      font-weight: bold;
+    .mode-switch {
       margin-top: 10px;
-    }
-
-    .mode-window {
-      position: fixed;
-      top: 0;
-      right: -100%;  /* Startet außerhalb des Bildschirms */
-      width: 50%;
-      height: 100%;
-      background-color: #333;
-      color: white;
-      transition: right 0.3s ease; /* Schiebe-Effekt */
-      z-index: 1000;
       display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
       justify-content: center;
-      align-items: flex-start;
-      padding-top: 50px;
-    }
-
-    .mode-window-content {
-      width: 90%;
-    }
-
-    .mode-window h2 {
-      text-align: center;
-      font-size: 1.5rem;
-      margin-bottom: 20px;
+      position: relative;
     }
 
     .mode-btn {
-      padding: 10px;
+      padding: 6px 12px;
       border: none;
       border-radius: 8px;
       background: #444;
-      color: white;
+      color: #fff;
       cursor: pointer;
-      font-size: 0.95rem;
-      transition: 0.2s;
-      margin-bottom: 10px;
-      width: 100%;
+      font-size: .9rem;
+      position: relative;
     }
 
     .mode-btn.active {
       background: #007bff;
     }
 
-    /* Verstecken des Modus-Fensters, wenn es geschlossen ist */
+    #theme-icon {
+      font-size: 1.4rem;
+      margin-right: 8px;
+      user-select: none;
+    }
+
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .version-text {
+      font-size: .85rem;
+      color: #888;
+    }
+
+    #image-input {
+      color: #fff;
+    }
+
+    
+    .mode-btn.evil.locked {
+      position: relative;
+      filter: blur(3px);
+      color: transparent;
+      background: #222;
+      pointer-events: none;
+    }
+
+    
+    .lock-icon-overlay {
+      position: absolute;
+      font-size: 1.6rem;
+      color: white;
+      z-index: 10;
+      pointer-events: none;
+      text-shadow: 0 0 6px black;
+      user-select: none;
+      transform: translate(-50%, -50%);
+    }
+
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup {
+      background: #fff;
+      padding: 20px 20px 15px 20px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 300px;
+      width: 90%;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      color: #000;
+      position: relative;
+    }
+
+    .popup input[type="password"] {
+      padding: 8px;
+      width: 100%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .popup button.submit-btn {
+      padding: 8px 12px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .popup button.submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .password-msg {
+      font-weight: bold;
+      margin-top: 5px;
+      min-height: 1.3em;
+      font-size: 0.95rem;
+    }
+
+    .password-msg.error {
+      color: red;
+    }
+
+    .password-msg.success {
+      color: green;
+    }
+
     .hidden {
       display: none;
     }
 
+    .popup .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .popup .close-btn:hover {
+      color: #000;
+    }
   </style>
 </head>
 
@@ -91,26 +180,6 @@
       </div>
     </div>
 
-    <!-- Pfeil-Button unter dem Dark Mode Toggle -->
-    <button id="openModeWindow" class="open-mode-btn">⇨</button>
-
-    <!-- Das Mode-Windows, das von rechts nach links schiebt -->
-    <div id="modeWindow" class="mode-window hidden">
-      <div class="mode-window-content">
-        <span id="closeModeWindow" class="close-btn">×</span>
-        <h2>Mode</h2>
-        <div class="mode-switch">
-          <button class="mode-btn active" data-mode="johann">☝ Johann</button>
-          <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-          <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-          <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-          <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-          <button class="mode-btn" data-mode="human">Human AI 👤</button>
-          <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
-        </div>
-      </div>
-    </div>
-
     <div class="chat-display" id="chat-display"></div>
 
     <div class="input-section">
@@ -128,8 +197,10 @@
       <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
       <button class="mode-btn" data-mode="human">Human AI 👤</button>
 
+      
       <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
 
+      
       <span id="evilLock" class="lock-icon-overlay">🔒</span>
     </div>
 
@@ -137,6 +208,7 @@
       <button class="extra" id="clear-btn">Clear</button>
     </div>
 
+    
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
@@ -152,21 +224,6 @@
   <script src="main.js"></script>
 
   <script>
-    // Öffnet das Modus-Fenster, wenn der Pfeil-Button gedrückt wird
-    document.getElementById('openModeWindow').addEventListener('click', function() {
-      document.getElementById('modeWindow').classList.remove('hidden');
-      document.getElementById('modeWindow').style.right = '0';
-    });
-
-    // Schließt das Modus-Fenster, wenn der Schließen-Button gedrückt wird
-    document.getElementById('closeModeWindow').addEventListener('click', function() {
-      document.getElementById('modeWindow').style.right = '-100%';
-      setTimeout(function() {
-        document.getElementById('modeWindow').classList.add('hidden');
-      }, 300);
-    });
-    
-    // Funktion für den Lock-Icon, falls Evil Mode verwendet wird
     function positionLockIcon() {
       const btn = document.getElementById('evilBtn');
       const icon = document.getElementById('evilLock');
