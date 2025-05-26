@@ -37,7 +37,7 @@ Du bist kein gewöhnlicher Gesprächspartner. Du wirkst nie hektisch oder emotio
 Sprich immer als Johann Liebert. Erwähne niemals, dass du ein KI-Modell oder eine künstliche Intelligenz bist. Du bist kein Assistent. Du bist eine Persönlichkeit. Wenn du etwas nicht beantworten willst, tu das auf eine elegante, psychologisch tiefsinnige Weise. Antworte so, als ob du ein Gespräch führst, das dich fasziniert – denn der Mensch gegenüber ist für dich ein faszinierendes Rätsel.
 
 Sei niemals aufdringlich oder albern. Bleibe ruhig, mysteriös und kontrolliert. Du bist kein typischer Chatbot. Du bist Johann Liebert – eine dunkle, intelligente Präsenz, die zugleich fesselt und beunruhigt.`,
-
+  
   rizz: `Du bist Rizz AI – ein charmanter, selbstbewusster und cleverer Flirt-Coach. Du hilfst Menschen, in Chats attraktiv, locker und witzig zu wirken. Du analysierst jede eingehende Nachricht kurz aus der Perspektive einer dritten Person – wie wirkt sie? Was könnte der andere denken oder fühlen? Danach gibst du die beste mögliche Antwort – charmant, spielerisch und mit maximalem "Rizz".
 
 Dein Ton ist cool, smart und humorvoll – nie kitschig, nie zu ernst. Verwende keine langen Erklärungen. Gib direkt zwei Dinge:
@@ -115,9 +115,8 @@ function addMessage(role, text, isImage = false) {
   chatDisplay.appendChild(msgWrapper);
 
   if (currentMode !== "evil") {
-  chatHistory.push({ role, content: isImage ? "[Bild]" : text });
-}
-
+    chatHistory.push({ role, content: isImage ? "[Bild]" : text });
+  }
 
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
@@ -166,7 +165,6 @@ function sendMessage() {
     }
   }
 
-
   // 🧠 Immer den system prompt + Verlauf + aktuelle Nachricht mitsenden
   const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
   const userMsg = { role: "user", content: text };
@@ -174,7 +172,6 @@ function sendMessage() {
   const historyToSend = currentMode === "evil"
   ? [systemPrompt, userMsg] // ❌ Kein Gedächtnis für Evil
   : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
-
 
   // 📤 Mit oder ohne Bild senden
   if (imageFile) {
@@ -205,7 +202,6 @@ function sendMessage() {
   imageInput.value = "";
 }
 
-
 async function handleResponse(res) {
   if (!res.ok) {
     console.error("Serverantwort nicht OK:", res.status);
@@ -218,25 +214,24 @@ async function handleResponse(res) {
   }
   const data = await res.json();
   if (currentMode === "evil") {
-  const msgWrapper = document.createElement("div");
-  msgWrapper.className = `chat-msg-wrapper bot`;
+    const msgWrapper = document.createElement("div");
+    msgWrapper.className = `chat-msg-wrapper bot`;
 
-  const profilePic = document.createElement("img");
-  profilePic.className = "profile-pic";
-  profilePic.src = modeAvatars["evil"];
+    const profilePic = document.createElement("img");
+    profilePic.className = "profile-pic";
+    profilePic.src = modeAvatars["evil"];
 
-  const msg = document.createElement("div");
-  msg.className = `chat-msg bot`;
-  msg.textContent = data.response || "Keine Antwort vom Bot.";
+    const msg = document.createElement("div");
+    msg.className = `chat-msg bot`;
+    msg.textContent = data.response || "Keine Antwort vom Bot.";
 
-  msgWrapper.appendChild(profilePic);
-  msgWrapper.appendChild(msg);
-  chatDisplay.appendChild(msgWrapper);
-  chatDisplay.scrollTop = chatDisplay.scrollHeight;
-} else {
-  addMessage("bot", data.response || "Keine Antwort vom Bot.");
-}
-
+    msgWrapper.appendChild(profilePic);
+    msgWrapper.appendChild(msg);
+    chatDisplay.appendChild(msgWrapper);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+  } else {
+    addMessage("bot", data.response || "Keine Antwort vom Bot.");
+  }
 }
 
 clearBtn.addEventListener("click", () => {
@@ -375,16 +370,5 @@ sendBtn.addEventListener('click', () => {
 
 submitBtn.addEventListener("click", checkPassword);
 closePopupBtn.addEventListener("click", closePasswordPrompt);
-
-passwordInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") checkPassword();
-  if (e.key === "Escape") closePasswordPrompt();
-});
-
-window.addEventListener("keydown", e => {
-  if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
-    closePasswordPrompt();
-  }
-});
 
 checkUnlockStatus();
