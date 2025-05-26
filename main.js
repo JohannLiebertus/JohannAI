@@ -265,7 +265,6 @@ function lockEvilMode() {
   evilBtn.classList.add("locked");
   evilBtn.classList.remove("active");
   evilBtn.style.pointerEvents = "auto";
-  evilBtn.style.filter = "blur(2px)";
   evilBtn.style.color = "transparent";
 }
 
