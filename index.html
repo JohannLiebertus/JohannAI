@@ -340,54 +340,75 @@
 
   <div class="input-section">
     <input type="text" id="user-input" placeholder="Write...">
-    <button id="send-btn" class="send-btn">Send</button>
+    <button id="send-text-btn" class="send-btn">Send</button>
+    <button id="send-icon-btn">➤</button>
+
     <label for="image-input" class="file-btn">📎</label>
-    <input type="file" id="image-input" accept="image/*" style="display:none;">
+    <input type="file" id="image-input" class="hidden" accept="image/*" />
   </div>
 
-  <!-- Button: Toggle Panel -->
-  <button id="togglePanel" class="toggle-mode-panel" aria-label="Toggle Mode Panel">➤</button>
+  <button class="toggle-mode-panel" id="toggle-mode-panel">⯈</button>
 
-  <!-- Slide-In Mode Panel -->
-  <div id="modePanel" class="mode-panel" aria-hidden="true">
-    <h2>Mode</h2>
+  <div class="mode-panel" id="mode-panel">
+    <h2>Modus auswählen</h2>
     <div class="mode-buttons">
-      <button class="mode-btn" data-mode="johann">☝ Johann</button>
-      <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-      <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-      <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-      <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-      <button class="mode-btn" data-mode="human">Human AI 👤</button>
-      <button id="evilBtnPanel" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
+      <button class="mode-btn">Normal</button>
+      <button class="mode-btn">Kreativ</button>
+      <button class="mode-btn">Präzise</button>
+      <button class="mode-btn">Humor</button>
+      <button class="mode-btn evil locked">
+        <span class="lock-icon-overlay">🔒</span>
+        Evil Mode
+      </button>
     </div>
   </div>
 
-  <div class="extra-buttons">
-    <button class="extra" id="clear-btn">Clear</button>
-  </div>
-
-  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
+  <div class="overlay hidden" id="password-overlay">
     <div class="popup">
-      <span class="close-btn" id="closePopup" title="Schließen">×</span>
-      <p id="popupTitle">Enter password to unlock Evil Mode:</p>
-      <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
-      <div id="passwordMsg" class="password-msg"></div>
-      <button class="submit-btn" id="submitPassword">Submit</button>
+      <span class="close-btn" id="close-popup">&times;</span>
+      <h3>Passwort eingeben</h3>
+      <input type="password" id="evil-password" placeholder="Passwort" />
+      <button class="submit-btn" id="submit-password">Entsperren</button>
+      <div class="password-msg" id="password-msg"></div>
     </div>
   </div>
-
-  <script src="main.js"></script>
 
   <script>
-    const togglePanelBtn = document.getElementById("togglePanel");
-    const modePanel = document.getElementById("modePanel");
+    const togglePanelBtn = document.getElementById('toggle-mode-panel');
+    const modePanel = document.getElementById('mode-panel');
+    const evilBtn = document.querySelector('.mode-btn.evil.locked');
+    const overlay = document.getElementById('password-overlay');
+    const closeBtn = document.getElementById('close-popup');
+    const submitPasswordBtn = document.getElementById('submit-password');
+    const passwordInput = document.getElementById('evil-password');
+    const passwordMsg = document.getElementById('password-msg');
 
-    togglePanelBtn.addEventListener("click", () => {
-      modePanel.classList.toggle("open");
-      togglePanelBtn.classList.toggle("open");
-      // accessibility attribute update
-      const isOpen = modePanel.classList.contains("open");
-      modePanel.setAttribute("aria-hidden", !isOpen);
+    togglePanelBtn.addEventListener('click', () => {
+      modePanel.classList.toggle('open');
+      togglePanelBtn.classList.toggle('open');
+    });
+
+    evilBtn.addEventListener('click', () => {
+      overlay.classList.remove('hidden');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.add('hidden');
+      passwordMsg.textContent = '';
+      passwordInput.value = '';
+    });
+
+    submitPasswordBtn.addEventListener('click', () => {
+      const correctPassword = "smylemode"; // Passwort hier anpassen
+      if (passwordInput.value === correctPassword) {
+        document.querySelector('.mode-btn.evil').classList.remove('locked');
+        overlay.classList.add('hidden');
+        passwordMsg.textContent = '';
+        passwordInput.value = '';
+      } else {
+        passwordMsg.textContent = "Falsches Passwort.";
+        passwordMsg.classList.add('error');
+      }
     });
   </script>
 
