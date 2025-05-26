@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Johann M – by Lächelmann</title>
@@ -55,6 +54,7 @@
       color: #fff;
     }
 
+    
     .mode-btn.evil.locked {
       position: relative;
       filter: blur(3px);
@@ -63,6 +63,7 @@
       pointer-events: none;
     }
 
+    
     .lock-icon-overlay {
       position: absolute;
       font-size: 1.6rem;
@@ -74,6 +75,7 @@
       transform: translate(-50%, -50%);
     }
 
+    
     .overlay {
       position: fixed;
       top: 0;
@@ -157,45 +159,97 @@
       color: #000;
     }
 
-    /* ==== INTEGRIERTER STYLE2.CSS: SWITCH BAR ==== */
-    .switch-bar {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 2rem auto;
-      padding: 1rem;
-      background-color: #f4f4f4;
-      border-radius: 1rem;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-    }
+    .mode-panel {
+  position: fixed;
+  top: 60px;
+  right: -50%;
+  width: 50%;
+  height: 100%;
+  background-color: #1f1f1f;
+  border-left: 2px solid #333;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  transition: right 0.4s ease;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-    .switch-bar button {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 2rem;
-      background-color: #e0e0e0;
-      color: #333;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+.mode-panel.open {
+  right: 0;
+}
 
-    .switch-bar button:hover {
-      background-color: #d0d0d0;
-      transform: translateY(-2px);
-    }
+.mode-panel h2 {
+  font-size: 1.5rem;
+  color: #0ff;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+  animation: neon-glow 1.5s infinite alternate;
+}
 
-    .switch-bar button.active {
-      background-color: #4f46e5;
-      color: white;
-      font-weight: bold;
-    }
+@keyframes neon-glow {
+  from {
+    text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+  }
+  to {
+    text-shadow: 0 0 15px #0ff, 0 0 25px #0ff;
+  }
+}
+
+.mode-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  justify-items: center;
+}
+
+.mode-buttons .mode-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #444;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.2s;
+  text-align: center;
+}
+
+.mode-buttons .mode-btn.evil {
+  grid-column: span 2;
+  justify-self: center;
+  background: linear-gradient(180deg, #8B0000 0%, #FF4C4C 100%);
+  color: white;
+  border: 2px solid #5A0000;
+  box-shadow: 0 4px 6px rgba(139, 0, 0, 0.6);
+  text-shadow: 0 0 5px #FF0000;
+}
+
+.toggle-mode-panel {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  background: transparent;
+  color: white;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.toggle-mode-panel.open {
+  transform: rotate(180deg);
+}
+
+
   </style>
 </head>
 
 <body>
-  <div class="container">
 
     <div class="rainbow-bar"></div>
 
@@ -215,38 +269,41 @@
 
     <div class="chat-display" id="chat-display"></div>
 
-    <div class="input-section">
-      <input type="text" id="user-input" placeholder="Nachricht eingeben...">
-      <button id="toggle-sidebar" class="sidebar-toggle">⚙️</button>
-      <input type="file" id="image-input" accept="image/*" style="display:none;">
-      <label for="image-input" class="file-btn" title="Bild anhängen">📎</label>
-      <button id="send-btn" class="send-btn">Senden</button>
-    </div>
+<div class="input-section">
+  <input type="text" id="user-input" placeholder="Write...">
+  <button id="send-btn" class="send-btn">Send</button>
+  <label for="image-input" class="file-btn">📎</label>
+  <input type="file" id="image-input" accept="image/*" style="display:none;">
+</div>
 
-    <div class="mode-switch">
-      <button class="mode-btn active" data-mode="johann">☝ Johann</button>
-      <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-      <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-      <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-      <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-      <button class="mode-btn" data-mode="human">Human AI 👤</button>
 
-      <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
+<!-- Button: Toggle Panel -->
+<button id="togglePanel" class="toggle-mode-panel">➤</button>
+
+<!-- Slide-In Mode Panel -->
+<div id="modePanel" class="mode-panel">
+  <h2>Mode</h2>
+  <div class="mode-buttons">
+    <button class="mode-btn" data-mode="johann">☝ Johann</button>
+    <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+    <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+    <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+    <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+    <button class="mode-btn" data-mode="human">Human AI 👤</button>
+    <button id="evilBtnPanel" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
+  </div>
+</div>
+
+
+      
       <span id="evilLock" class="lock-icon-overlay">🔒</span>
-    </div>
-
-    <!-- Beispielhafte neue Switch Bar -->
-    <div class="switch-bar">
-      <button class="active">All</button>
-      <button>Design</button>
-      <button>Development</button>
-      <button>Marketing</button>
     </div>
 
     <div class="extra-buttons">
       <button class="extra" id="clear-btn">Clear</button>
     </div>
 
+    
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
@@ -258,12 +315,12 @@
     </div>
 
   </div>
-
+  
   <script src="main.js"></script>
 
   <script>
     function positionLockIcon() {
-      const btn = document.getElementById('evilBtn');
+      const btn = document.getElementById('evilBtnPanel');
       const icon = document.getElementById('evilLock');
       const rect = btn.getBoundingClientRect();
 
@@ -274,5 +331,15 @@
     window.addEventListener('load', positionLockIcon);
     window.addEventListener('resize', positionLockIcon);
   </script>
+  <script>
+  const togglePanelBtn = document.getElementById("togglePanel");
+  const modePanel = document.getElementById("modePanel");
+
+  togglePanelBtn.addEventListener("click", () => {
+    modePanel.classList.toggle("open");
+    togglePanelBtn.classList.toggle("open");
+  });
+</script>
+
 </body>
 </html>
