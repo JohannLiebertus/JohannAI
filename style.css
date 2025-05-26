@@ -734,7 +734,6 @@ body.dark-mode .extra {
     radial-gradient(circle at 20% 50%, #FF0000 0%, transparent 70%),
     radial-gradient(circle at 50% 50%, #B20000 0%, transparent 70%),
     radial-gradient(circle at 80% 50%, #FF1A1A 0%, transparent 70%);
-  filter: blur(2px);
   border-radius: 50% / 30%;
   opacity: 0.8;
   pointer-events: none;
@@ -797,7 +796,6 @@ body.dark-mode .extra {
     
     .mode-btn.evil.locked {
       position: relative;
-      filter: blur(3px);
       color: transparent;
       background: #222;
       pointer-events: none;
