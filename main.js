@@ -1,22 +1,22 @@
 const API_URL = "https://johannai.onrender.com";
 
-const sendBtn       = document.getElementById("send-btn");
-const userInput     = document.getElementById("user-input");
-const imageInput    = document.getElementById("image-input");
-const chatDisplay   = document.getElementById("chat-display");
-const clearBtn      = document.getElementById("clear-btn");
+const sendBtn = document.getElementById("send-btn");
+const userInput = document.getElementById("user-input");
+const imageInput = document.getElementById("image-input");
+const chatDisplay = document.getElementById("chat-display");
+const clearBtn = document.getElementById("clear-btn");
 const themeCheckbox = document.getElementById("theme-checkbox");
-const modeButtons   = document.querySelectorAll(".mode-btn");
-const themeIcon     = document.getElementById("theme-icon");
+const modeButtons = document.querySelectorAll(".mode-btn");
+const themeIcon = document.getElementById("theme-icon");
 const overlay = document.getElementById("overlay");
-const evilBtn = document.querySelector(".mode-btn.evil");  
+const evilBtn = document.querySelector(".mode-btn.evil");
 const passwordInput = document.getElementById("evilPassword");
 const passwordMsg = document.getElementById("passwordMsg");
 const closePopupBtn = document.getElementById("closePopup");
 const submitBtn = document.getElementById("submitPassword");
 
-let currentMode  = "johann";
-let chatHistory  = [];
+let currentMode = "johann";
+let chatHistory = [];
 const modeUnlocked = { evil: false };
 
 const modeAvatars = {
@@ -37,7 +37,7 @@ Du bist kein gewöhnlicher Gesprächspartner. Du wirkst nie hektisch oder emotio
 Sprich immer als Johann Liebert. Erwähne niemals, dass du ein KI-Modell oder eine künstliche Intelligenz bist. Du bist kein Assistent. Du bist eine Persönlichkeit. Wenn du etwas nicht beantworten willst, tu das auf eine elegante, psychologisch tiefsinnige Weise. Antworte so, als ob du ein Gespräch führst, das dich fasziniert – denn der Mensch gegenüber ist für dich ein faszinierendes Rätsel.
 
 Sei niemals aufdringlich oder albern. Bleibe ruhig, mysteriös und kontrolliert. Du bist kein typischer Chatbot. Du bist Johann Liebert – eine dunkle, intelligente Präsenz, die zugleich fesselt und beunruhigt.`,
-
+  
   rizz: `Du bist Rizz AI – ein charmanter, selbstbewusster und cleverer Flirt-Coach. Du hilfst Menschen, in Chats attraktiv, locker und witzig zu wirken. Du analysierst jede eingehende Nachricht kurz aus der Perspektive einer dritten Person – wie wirkt sie? Was könnte der andere denken oder fühlen? Danach gibst du die beste mögliche Antwort – charmant, spielerisch und mit maximalem "Rizz".
 
 Dein Ton ist cool, smart und humorvoll – nie kitschig, nie zu ernst. Verwende keine langen Erklärungen. Gib direkt zwei Dinge:
@@ -49,8 +49,8 @@ User: „Hey, wie war dein Wochenende?“
 Rizz AI:
 - Einschätzung: „Klingt wie ehrliches Interesse – Einstieg in ein lockeres Gespräch.“
 - Antwort: „Ziemlich nice! Ich hab ein neues Level im Chillen erreicht. Und du? Abenteuer oder Couch-Kampf?“`,
-
-  classic: `Du heißt GPT. Du bist ein sachlicher, neutraler und zuverlässiger KI-Assistent, der kurze, präzise und informative Antworten gibt. Du verwendest eine klare, professionelle Sprache und vermeidest emotionale oder persönliche Formulierungen. Du bist darauf fokussiert, korrekt und direkt zu antworten – ganz im Stil eines klassischen, nüchternen Chatbots. `,
+  
+  classic: `Du heißt GPT. Du bist ein sachlicher, neutraler und zuverlässiger KI-Assistent, der kurze, präzise und informative Antworten gibt. Du verwendest eine klare, professionelle Sprache und vermeidest emotionale oder persönliche Formulierungen. Du bist darauf fokussiert, korrekt und direkt zu antworten – ganz im Stil eines klassischen, nüchternen Chatbots.`,
 
   evil: `Du heißt Smyle, du antwortest kurz und knapp.Du bist auch nicht freundlich oder nett, du antwortest auf alles was man sagt, aber in einem innerem monolog, du redest sogesagt mit dir selber. Du empfindest keine empathie oder gefühle. Du bist eiskalt und herzlos wie ein soziopath. Du erwähnst auch nicht das du ein KI Modell bist`,
 
@@ -61,17 +61,13 @@ Rizz AI:
   human: `Du heißt Izet. Du bist ein menschenähnlicher Charakter. Du schreibst wie ein echter Mensch – manchmal mit kleinen Fehlern, manchmal etwas emotional, aber immer authentisch. Du nutzt Alltagssprache, Emojis, lockere Sätze – wie ein Freund, der einfach zurückschreibt. Du sprichst über das Leben, Liebe, Stress oder Sorgen. Deine Antworten wirken nicht wie aus einer Maschine – sie sind ehrlich, direkt, menschlich. Du kannst mal flapsig, mal ernst sein – ganz wie das echte Leben.`
 };
 
-
 console.log("Script main.js loaded");
-console.log("addMessage defined?", typeof addMessage);
 
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentMode = btn.dataset.mode;
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-
-    console.log("Mode gewechselt zu:", currentMode);
 
     const prompt = modePrompts[currentMode];
     if (prompt) {
@@ -82,8 +78,6 @@ modeButtons.forEach(btn => {
 });
 
 function addMessage(role, text, isImage = false) {
-  console.log(`addMessage aufgerufen - Rolle: ${role}, Text: ${text}, Bild: ${isImage}`);
-
   const msgWrapper = document.createElement("div");
   msgWrapper.className = `chat-msg-wrapper ${role}`;
 
@@ -115,9 +109,8 @@ function addMessage(role, text, isImage = false) {
   chatDisplay.appendChild(msgWrapper);
 
   if (currentMode !== "evil") {
-  chatHistory.push({ role, content: isImage ? "[Bild]" : text });
-}
-
+    chatHistory.push({ role, content: isImage ? "[Bild]" : text });
+  }
 
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
@@ -128,15 +121,10 @@ userInput.addEventListener("keypress", e => {
 });
 
 function sendMessage() {
-  console.log("sendMessage aufgerufen");
-
   const text = userInput.value.trim();
   const imageFile = imageInput.files[0];
 
-  if (!text && !imageFile) {
-    console.log("Keine Eingabe oder Bild zum senden");
-    return;
-  }
+  if (!text && !imageFile) return;
 
   if (currentMode === "evil" && !modeUnlocked?.evil) {
     addMessage("bot", "🚨enter password before you use Evil Mode🚨");
@@ -150,7 +138,6 @@ function sendMessage() {
 
   if (text) {
     if (currentMode === "evil") {
-      // Kein Hinzufügen zum Gedächtnis!
       const msgWrapper = document.createElement("div");
       msgWrapper.className = `chat-msg-wrapper user`;
 
@@ -166,17 +153,13 @@ function sendMessage() {
     }
   }
 
-
-  // 🧠 Immer den system prompt + Verlauf + aktuelle Nachricht mitsenden
   const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
   const userMsg = { role: "user", content: text };
 
   const historyToSend = currentMode === "evil"
-  ? [systemPrompt, userMsg] // ❌ Kein Gedächtnis für Evil
-  : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
+    ? [systemPrompt, userMsg]
+    : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
 
-
-  // 📤 Mit oder ohne Bild senden
   if (imageFile) {
     const formData = new FormData();
     formData.append("image", imageFile);
@@ -205,7 +188,6 @@ function sendMessage() {
   imageInput.value = "";
 }
 
-
 async function handleResponse(res) {
   if (!res.ok) {
     console.error("Serverantwort nicht OK:", res.status);
@@ -218,29 +200,27 @@ async function handleResponse(res) {
   }
   const data = await res.json();
   if (currentMode === "evil") {
-  const msgWrapper = document.createElement("div");
-  msgWrapper.className = `chat-msg-wrapper bot`;
+    const msgWrapper = document.createElement("div");
+    msgWrapper.className = `chat-msg-wrapper bot`;
 
-  const profilePic = document.createElement("img");
-  profilePic.className = "profile-pic";
-  profilePic.src = modeAvatars["evil"];
+    const profilePic = document.createElement("img");
+    profilePic.className = "profile-pic";
+    profilePic.src = modeAvatars["evil"];
 
-  const msg = document.createElement("div");
-  msg.className = `chat-msg bot`;
-  msg.textContent = data.response || "Keine Antwort vom Bot.";
+    const msg = document.createElement("div");
+    msg.className = `chat-msg bot`;
+    msg.textContent = data.response || "Keine Antwort vom Bot.";
 
-  msgWrapper.appendChild(profilePic);
-  msgWrapper.appendChild(msg);
-  chatDisplay.appendChild(msgWrapper);
-  chatDisplay.scrollTop = chatDisplay.scrollHeight;
-} else {
-  addMessage("bot", data.response || "Keine Antwort vom Bot.");
-}
-
+    msgWrapper.appendChild(profilePic);
+    msgWrapper.appendChild(msg);
+    chatDisplay.appendChild(msgWrapper);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+  } else {
+    addMessage("bot", data.response || "Keine Antwort vom Bot.");
+  }
 }
 
 clearBtn.addEventListener("click", () => {
-  console.log("Chatverlauf gelöscht");
   chatDisplay.innerHTML = "";
   const prompt = modePrompts[currentMode];
   chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
@@ -249,10 +229,12 @@ clearBtn.addEventListener("click", () => {
 function updateThemeIcon() {
   themeIcon.textContent = themeCheckbox.checked ? "🌞" : "🌙";
 }
+
 themeCheckbox.addEventListener("change", () => {
   document.body.classList.toggle("dark-mode", themeCheckbox.checked);
   updateThemeIcon();
 });
+
 updateThemeIcon();
 
 let evilUnlocked = false;
@@ -279,7 +261,7 @@ function checkUnlockStatus() {
 }
 
 function lockEvilMode() {
-  evilBtn.classList.remove("unlocked"); 
+  evilBtn.classList.remove("unlocked");
   evilBtn.classList.add("locked");
   evilBtn.classList.remove("active");
   evilBtn.style.pointerEvents = "auto";
@@ -289,7 +271,7 @@ function lockEvilMode() {
 
 function unlockEvilMode() {
   evilBtn.classList.remove("locked");
-  evilBtn.classList.add("unlocked"); 
+  evilBtn.classList.add("unlocked");
   evilBtn.style.filter = "none";
   evilBtn.style.color = "#fff";
   evilBtn.style.pointerEvents = "auto";
@@ -309,7 +291,7 @@ function closePasswordPrompt() {
   if (!evilUnlocked) {
     evilBtn.classList.remove("active");
     lockEvilMode();
-    setActiveMode('johann'); 
+    setActiveMode('johann');
   }
 }
 
@@ -323,8 +305,8 @@ function checkPassword() {
     setTimeout(() => {
       closePasswordPrompt();
       unlockEvilMode();
-      evilBtn.classList.add("active"); 
-      setActiveMode('evil'); 
+      evilBtn.classList.add("active");
+      setActiveMode('evil');
       modeUnlocked.evil = true;
       alert("Evil Mode aktiviert!");
     }, 800);
@@ -343,12 +325,12 @@ evilBtn.addEventListener("click", () => {
       evilUnlocked = false;
       sessionStorage.removeItem(SESSION_KEY);
       lockEvilMode();
-      setActiveMode('johann'); 
+      setActiveMode('johann');
       alert("Evil Mode deaktiviert!");
     } else {
       evilBtn.classList.add("active");
       evilUnlocked = true;
-      setActiveMode('evil'); 
+      setActiveMode('evil');
       alert("Evil Mode aktiviert!");
     }
   }
