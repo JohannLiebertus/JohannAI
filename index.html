@@ -7,13 +7,192 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    .mode-switch {
-      margin-top: 10px;
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #eee;
+    }
+
+    .rainbow-bar {
+      height: 6px;
+      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+    }
+
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 15px;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .title-bar h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #0ff;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+      animation: neon-glow 1.5s infinite alternate;
+    }
+
+    @keyframes neon-glow {
+      from {
+        text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+      }
+      to {
+        text-shadow: 0 0 15px #0ff, 0 0 25px #0ff;
+      }
+    }
+
+    .version-text {
+      font-size: .85rem;
+      color: #888;
+    }
+
+    #theme-icon {
+      font-size: 1.4rem;
+      margin-right: 8px;
+      user-select: none;
+    }
+
+    .chat-display {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 1rem;
+      background-color: #222;
+      margin-bottom: 60px; /* Platz fürs input-section */
+    }
+
+    .input-section {
+      flex-shrink: 0;
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
+      padding: 10px;
+      background-color: #1a1a1a;
+      border-top: 1px solid #333;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .input-section input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      background: #333;
+      color: #eee;
+    }
+
+    .input-section button,
+    .input-section label.file-btn {
+      background: #444;
+      border: none;
+      border-radius: 8px;
+      color: #eee;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+
+    .input-section button:hover,
+    .input-section label.file-btn:hover {
+      background: #666;
+    }
+
+    .mode-panel {
+      position: fixed;
+      top: 60px;
+      right: -100%; /* komplett raus aus Sicht */
+      width: 300px;
+      height: calc(100% - 60px);
+      background-color: #1f1f1f;
+      border-left: 2px solid #333;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+      padding: 1rem;
+      transition: right 0.4s ease;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .mode-panel.open {
+      right: 0;
+    }
+
+    .mode-panel h2 {
+      font-size: 1.5rem;
+      color: #0ff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+      animation: neon-glow 1.5s infinite alternate;
+    }
+
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      justify-items: center;
+    }
+
+    .mode-buttons .mode-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .mode-buttons .mode-btn.evil {
+      grid-column: span 2;
+      justify-self: center;
+      background: linear-gradient(180deg, #8B0000 0%, #FF4C4C 100%);
+      color: white;
+      border: 2px solid #5A0000;
+      box-shadow: 0 4px 6px rgba(139, 0, 0, 0.6);
+      text-shadow: 0 0 5px #FF0000;
+    }
+
+    .toggle-mode-panel {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      background: transparent;
+      color: white;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      user-select: none;
+    }
+
+    .toggle-mode-panel.open {
+      transform: rotate(180deg);
     }
 
     .mode-btn {
@@ -31,30 +210,10 @@
       background: #007bff;
     }
 
-    #theme-icon {
-      font-size: 1.4rem;
-      margin-right: 8px;
-      user-select: none;
-    }
-
-    .title-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .version-text {
-      font-size: .85rem;
-      color: #888;
-    }
-
     #image-input {
       color: #fff;
     }
 
-    
     .mode-btn.evil.locked {
       position: relative;
       filter: blur(3px);
@@ -63,7 +222,6 @@
       pointer-events: none;
     }
 
-    
     .lock-icon-overlay {
       position: absolute;
       font-size: 1.6rem;
@@ -75,7 +233,6 @@
       transform: translate(-50%, -50%);
     }
 
-    
     .overlay {
       position: fixed;
       top: 0;
@@ -158,235 +315,81 @@
     .popup .close-btn:hover {
       color: #000;
     }
-
-    .mode-panel {
-  position: fixed;
-  top: 60px;
-  right: -50%;
-  width: 50%;
-  height: 100%;
-  background-color: #1f1f1f;
-  border-left: 2px solid #333;
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
-  padding: 1rem;
-  transition: right 0.4s ease;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.mode-panel.open {
-  right: 0;
-}
-
-.mode-panel h2 {
-  font-size: 1.5rem;
-  color: #0ff;
-  margin-bottom: 1rem;
-  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
-  animation: neon-glow 1.5s infinite alternate;
-}
-
-@keyframes neon-glow {
-  from {
-    text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
-  }
-  to {
-    text-shadow: 0 0 15px #0ff, 0 0 25px #0ff;
-  }
-}
-
-.mode-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  width: 100%;
-  justify-items: center;
-}
-
-.mode-buttons .mode-btn {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #444;
-  color: white;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: 0.2s;
-  text-align: center;
-}
-
-.mode-buttons .mode-btn.evil {
-  grid-column: span 2;
-  justify-self: center;
-  background: linear-gradient(180deg, #8B0000 0%, #FF4C4C 100%);
-  color: white;
-  border: 2px solid #5A0000;
-  box-shadow: 0 4px 6px rgba(139, 0, 0, 0.6);
-  text-shadow: 0 0 5px #FF0000;
-}
-
-.toggle-mode-panel {
-  position: absolute;
-  top: 60px;
-  right: 10px;
-  background: transparent;
-  color: white;
-  font-size: 20px;
-  border: none;
-  cursor: pointer;
-  z-index: 1000;
-  transition: transform 0.3s ease;
-}
-
-.toggle-mode-panel.open {
-  transform: rotate(180deg);
-}
-
-
   </style>
 </head>
 
 <body>
 
-    <div class="rainbow-bar"></div>
+  <div class="rainbow-bar"></div>
 
-    <div class="title-bar">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <h1 id="title">Johann AI by Smyle</h1>
-        <span class="version-text">Version: Alpha 2.1</span>
-      </div>
-      <div style="display:flex;align-items:center;">
-        <span id="theme-icon">🌙</span>
-        <label class="theme-toggle" style="margin:0;">
-          <input type="checkbox" id="theme-checkbox" />
-          <span class="slider"></span>
-        </label>
-      </div>
+  <div class="title-bar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h1 id="title">Johann AI by Smyle</h1>
+      <span class="version-text">Version: Alpha 2.1</span>
     </div>
-
-    <div class="chat-display" id="chat-display"></div>
-
-<div class="input-section">
-  <input type="text" id="user-input" placeholder="Write...">
-  <button id="send-btn" class="send-btn">Send</button>
-  <label for="image-input" class="file-btn">📎</label>
-  <input type="file" id="image-input" accept="image/*" style="display:none;">
-</div>
-
-
-<!-- Button: Toggle Panel -->
-<button id="togglePanel" class="toggle-mode-panel">➤</button>
-
-<!-- Slide-In Mode Panel -->
-<div id="modePanel" class="mode-panel">
-  <h2>Mode</h2>
-  <div class="mode-buttons">
-    <button class="mode-btn" data-mode="johann">☝ Johann</button>
-    <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-    <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-    <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-    <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-    <button class="mode-btn" data-mode="human">Human AI 👤</button>
-    <button id="evilBtnPanel" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
+    <div style="display:flex;align-items:center;">
+      <span id="theme-icon">🌙</span>
+      <label class="theme-toggle" style="margin:0;">
+        <input type="checkbox" id="theme-checkbox" />
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
-</div>
 
+  <div class="chat-display" id="chat-display"></div>
 
+  <div class="input-section">
+    <input type="text" id="user-input" placeholder="Write...">
+    <button id="send-btn" class="send-btn">Send</button>
+    <label for="image-input" class="file-btn">📎</label>
+    <input type="file" id="image-input" accept="image/*" style="display:none;">
+  </div>
 
-    <div class="extra-buttons">
-      <button class="extra" id="clear-btn">Clear</button>
+  <!-- Button: Toggle Panel -->
+  <button id="togglePanel" class="toggle-mode-panel" aria-label="Toggle Mode Panel">➤</button>
+
+  <!-- Slide-In Mode Panel -->
+  <div id="modePanel" class="mode-panel" aria-hidden="true">
+    <h2>Mode</h2>
+    <div class="mode-buttons">
+      <button class="mode-btn" data-mode="johann">☝ Johann</button>
+      <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+      <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+      <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+      <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+      <button class="mode-btn" data-mode="human">Human AI 👤</button>
+      <button id="evilBtnPanel" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
     </div>
+  </div>
 
-  
-    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
-      <div class="popup">
-        <span class="close-btn" id="closePopup" title="Schließen">×</span>
-        <p id="popupTitle">Enter password to unlock Evil Mode:</p>
-        <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
-        <div id="passwordMsg" class="password-msg"></div>
-        <button class="submit-btn" id="submitPassword">Submit</button>
-      </div>
+  <div class="extra-buttons">
+    <button class="extra" id="clear-btn">Clear</button>
+  </div>
+
+  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
+    <div class="popup">
+      <span class="close-btn" id="closePopup" title="Schließen">×</span>
+      <p id="popupTitle">Enter password to unlock Evil Mode:</p>
+      <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
+      <div id="passwordMsg" class="password-msg"></div>
+      <button class="submit-btn" id="submitPassword">Submit</button>
     </div>
+  </div>
 
-  
   <script src="main.js"></script>
 
   <script>
-    function positionLockIcon() {
-      const btn = document.getElementById('evilBtnPanel');
-      const icon = document.getElementById('evilLock');
-      const rect = btn.getBoundingClientRect();
+    const togglePanelBtn = document.getElementById("togglePanel");
+    const modePanel = document.getElementById("modePanel");
 
-      icon.style.top = `${btn.offsetTop + btn.offsetHeight / 2}px`;
-      icon.style.left = `${btn.offsetLeft + btn.offsetWidth / 2}px`;
-    }
-
-    window.addEventListener('load', positionLockIcon);
-    window.addEventListener('resize', positionLockIcon);
+    togglePanelBtn.addEventListener("click", () => {
+      modePanel.classList.toggle("open");
+      togglePanelBtn.classList.toggle("open");
+      // accessibility attribute update
+      const isOpen = modePanel.classList.contains("open");
+      modePanel.setAttribute("aria-hidden", !isOpen);
+    });
   </script>
-  <script>
-  const togglePanelBtn = document.getElementById("togglePanel");
-  const modePanel = document.getElementById("modePanel");
-
-  togglePanelBtn.addEventListener("click", () => {
-    modePanel.classList.toggle("open");
-    togglePanelBtn.classList.toggle("open");
-  });
-</script>
-
-<script>
-  // Evil Mode unlock logic
-  const evilBtn = document.getElementById('evilBtnPanel');
-  const overlay = document.getElementById('overlay');
-  const closePopupBtn = document.getElementById('closePopup');
-  const submitPasswordBtn = document.getElementById('submitPassword');
-  const evilPasswordInput = document.getElementById('evilPassword');
-  const passwordMsg = document.getElementById('passwordMsg');
-
-  const correctPassword = 'geheim'; // Passwort hier anpassen
-
-  evilBtn.addEventListener('click', () => {
-    overlay.classList.remove('hidden');
-    evilPasswordInput.value = '';
-    passwordMsg.textContent = '';
-    evilPasswordInput.focus();
-  });
-
-  closePopupBtn.addEventListener('click', () => {
-    overlay.classList.add('hidden');
-  });
-
-  overlay.addEventListener('click', (e) => {
-    if(e.target === overlay) {
-      overlay.classList.add('hidden');
-    }
-  });
-
-  submitPasswordBtn.addEventListener('click', () => {
-    const entered = evilPasswordInput.value.trim();
-    if(entered === correctPassword) {
-      passwordMsg.textContent = 'Unlocked Evil Mode!';
-      passwordMsg.classList.remove('error');
-      passwordMsg.classList.add('success');
-      evilBtn.classList.remove('locked');
-      overlay.classList.add('hidden');
-      evilBtn.disabled = false;
-    } else {
-      passwordMsg.textContent = 'Wrong password, try again!';
-      passwordMsg.classList.remove('success');
-      passwordMsg.classList.add('error');
-    }
-  });
-
-  evilPasswordInput.addEventListener('keypress', (e) => {
-    if(e.key === 'Enter') {
-      submitPasswordBtn.click();
-    }
-  });
-</script>
 
 </body>
 </html>
