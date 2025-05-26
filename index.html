@@ -295,15 +295,12 @@
 </div>
 
 
-      
-      
-    </div>
 
     <div class="extra-buttons">
       <button class="extra" id="clear-btn">Clear</button>
     </div>
 
-    
+  
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
@@ -314,7 +311,6 @@
       </div>
     </div>
 
-  </div>
   
   <script src="main.js"></script>
 
@@ -338,6 +334,57 @@
   togglePanelBtn.addEventListener("click", () => {
     modePanel.classList.toggle("open");
     togglePanelBtn.classList.toggle("open");
+  });
+</script>
+
+<script>
+  // Evil Mode unlock logic
+  const evilBtn = document.getElementById('evilBtnPanel');
+  const overlay = document.getElementById('overlay');
+  const closePopupBtn = document.getElementById('closePopup');
+  const submitPasswordBtn = document.getElementById('submitPassword');
+  const evilPasswordInput = document.getElementById('evilPassword');
+  const passwordMsg = document.getElementById('passwordMsg');
+
+  const correctPassword = 'geheim'; // Passwort hier anpassen
+
+  evilBtn.addEventListener('click', () => {
+    overlay.classList.remove('hidden');
+    evilPasswordInput.value = '';
+    passwordMsg.textContent = '';
+    evilPasswordInput.focus();
+  });
+
+  closePopupBtn.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+  });
+
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) {
+      overlay.classList.add('hidden');
+    }
+  });
+
+  submitPasswordBtn.addEventListener('click', () => {
+    const entered = evilPasswordInput.value.trim();
+    if(entered === correctPassword) {
+      passwordMsg.textContent = 'Unlocked Evil Mode!';
+      passwordMsg.classList.remove('error');
+      passwordMsg.classList.add('success');
+      evilBtn.classList.remove('locked');
+      overlay.classList.add('hidden');
+      evilBtn.disabled = false;
+    } else {
+      passwordMsg.textContent = 'Wrong password, try again!';
+      passwordMsg.classList.remove('success');
+      passwordMsg.classList.add('error');
+    }
+  });
+
+  evilPasswordInput.addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') {
+      submitPasswordBtn.click();
+    }
   });
 </script>
 
