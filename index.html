@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
+    /* Bestehende Styles bleiben erhalten */
+
     .mode-switch {
       margin-top: 10px;
       display: flex;
@@ -54,7 +56,6 @@
       color: #fff;
     }
 
-    
     .mode-btn.evil.locked {
       position: relative;
       filter: blur(3px);
@@ -63,7 +64,6 @@
       pointer-events: none;
     }
 
-    
     .lock-icon-overlay {
       position: absolute;
       font-size: 1.6rem;
@@ -75,7 +75,6 @@
       transform: translate(-50%, -50%);
     }
 
-    
     .overlay {
       position: fixed;
       top: 0;
@@ -158,6 +157,76 @@
     .popup .close-btn:hover {
       color: #000;
     }
+
+    /* Neues Modusfenster und Pfeil-Button */
+    /* Button für das Öffnen des Mode-Fensters */
+    .open-mode-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      font-weight: bold;
+    }
+
+    /* Das Mode-Windows (wird von rechts nach links geschoben) */
+    .mode-window {
+      position: fixed;
+      top: 0;
+      right: -100%;  /* Startet außerhalb des Bildschirms */
+      width: 50%;
+      height: 100%;
+      background-color: #333;
+      color: white;
+      transition: right 0.3s ease; /* Schiebe-Effekt */
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 50px;
+    }
+
+    .mode-window-content {
+      width: 90%;
+    }
+
+    .mode-window h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      font-size: 2rem;
+      cursor: pointer;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .mode-btn {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: 0.2s;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .mode-btn.active {
+      background: #007bff;
+    }
+
+    /* Hidden Klasse - Das Fenster ist zu Beginn verborgen */
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
@@ -180,6 +249,26 @@
       </div>
     </div>
 
+    <!-- Button für das Öffnen des Mode-Fensters -->
+    <button id="openModeWindow" class="open-mode-btn">⇨</button>
+
+    <!-- Das Mode-Windows, das von rechts nach links schiebt -->
+    <div id="modeWindow" class="mode-window hidden">
+      <div class="mode-window-content">
+        <span id="closeModeWindow" class="close-btn">×</span>
+        <h2>Mode</h2>
+        <div class="mode-switch">
+          <button class="mode-btn active" data-mode="johann">☝ Johann</button>
+          <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+          <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+          <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+          <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+          <button class="mode-btn" data-mode="human">Human AI 👤</button>
+          <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
+        </div>
+      </div>
+    </div>
+
     <div class="chat-display" id="chat-display"></div>
 
     <div class="input-section">
@@ -197,10 +286,8 @@
       <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
       <button class="mode-btn" data-mode="human">Human AI 👤</button>
 
-      
       <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
 
-      
       <span id="evilLock" class="lock-icon-overlay">🔒</span>
     </div>
 
@@ -208,7 +295,6 @@
       <button class="extra" id="clear-btn">Clear</button>
     </div>
 
-    
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
