@@ -41,15 +41,56 @@ body {
 }
 
 /* Grundlegender Titelstil */
+/* Grundlegender Titelstil */
 .title-bar h1 {
-    font-size: 48px;
+    font-size: 20px;
     font-weight: bold;
     color: red;
     margin: 0;
     overflow: hidden; /* Verhindert das Überlaufen des Textes während der Animation */
-    border-right: 4px solid red; /* Der blinkende Cursor */
+    border-right: 4px solid white; /* Der blinkende Cursor */
     white-space: nowrap; /* Verhindert Zeilenumbruch */
-    animation: typing 3s steps(30) 1s 1 normal both, blink 0.75s step-end infinite; /* Animation für den Typewriter-Effekt */
+    animation: typing 3s steps(30) 1s 1 normal both, 
+              blink 0.75s step-end infinite, 
+              reverseTyping 3s steps(30) 4s 1 normal both, 
+              pause 1.5s 7s; /* Typing, Reverse-Animation, Blink und Pause */
+}
+
+/* Typewriter-Effekt */
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+/* Reverse Typewriter-Effekt (Text wird zurückgeschrieben) */
+@keyframes reverseTyping {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0;
+    }
+}
+
+/* Blinkender Cursor-Effekt */
+@keyframes blink {
+    50% {
+        border-color: transparent;
+    }
+}
+
+/* Pause nach der Rückschreibung */
+@keyframes pause {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 /* Typewriter-Effekt */
