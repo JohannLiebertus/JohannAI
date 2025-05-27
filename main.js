@@ -70,6 +70,7 @@ modeButtons.forEach(btn => {
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
+    // Lade den passenden Prompt für den ausgewählten Modus
     const prompt = modePrompts[currentMode];
     if (prompt) {
       chatHistory = [{ role: "system", content: prompt }];
@@ -127,6 +128,7 @@ function sendMessage() {
 
   if (!text && !imageFile) return;
 
+  // Überprüfe, ob der Evil-Modus aktiviert ist, bevor der Text gesendet wird
   if (currentMode === "evil" && !modeUnlocked?.evil) {
     addMessage("bot", "🚨enter password before you use Evil Mode🚨");
     return;
