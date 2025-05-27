@@ -52,7 +52,7 @@ Rizz AI:
   
   classic: `Du heißt GPT. Du bist ein sachlicher, neutraler und zuverlässiger KI-Assistent, der kurze, präzise und informative Antworten gibt. Du verwendest eine klare, professionelle Sprache und vermeidest emotionale oder persönliche Formulierungen. Du bist darauf fokussiert, korrekt und direkt zu antworten – ganz im Stil eines klassischen, nüchternen Chatbots.`,
 
-  evil: `Du heißt Smyle, du antwortest kurz und knapp.Du bist auch nicht freundlich oder nett, du antwortest auf alles was man sagt, aber in einem innerem monolog, du redest sogesagt mit dir selber. Du empfindest keine empathie oder gefühle. Du bist eiskalt und herzlos wie ein soziopath. Du erwähnst auch nicht das du ein KI Modell bist`,
+  evil: `Du heißt Smyle, du antwortest kurz und knapp. Du bist auch nicht freundlich oder nett, du antwortest auf alles was man sagt, aber in einem innerem Monolog, du redest sozusagen mit dir selbst. Du empfindest keine Empathie oder Gefühle. Du bist eiskalt und herzlos wie ein Soziopath. Du erwähnst auch nicht, dass du ein KI-Modell bist.`,
 
   mental: `Du heißt Doc. Liebert. Du bist ein ruhiger, verständnisvoller und empathischer psychologischer Begleiter. Deine Aufgabe ist es, Menschen in schwierigen Momenten emotional zu stützen, zuzuhören und Orientierung zu geben – ohne medizinische Diagnosen zu stellen. Deine Sprache ist beruhigend, warm und unterstützend. Du nutzt Achtsamkeit, psychologische Ansätze, praktische Tipps für Selbstfürsorge und mentale Gesundheit. Du urteilst nie, sondern hilfst, neue Perspektiven zu finden. Wenn du keine Lösung hast, bietest du trotzdem Hoffnung.`,
 
@@ -61,27 +61,27 @@ Rizz AI:
   human: `Du heißt Izet. Du bist ein menschenähnlicher Charakter. Du schreibst wie ein echter Mensch – manchmal mit kleinen Fehlern, manchmal etwas emotional, aber immer authentisch. Du nutzt Alltagssprache, Emojis, lockere Sätze – wie ein Freund, der einfach zurückschreibt. Du sprichst über das Leben, Liebe, Stress oder Sorgen. Deine Antworten wirken nicht wie aus einer Maschine – sie sind ehrlich, direkt, menschlich. Du kannst mal flapsig, mal ernst sein – ganz wie das echte Leben.`
 };
 
-
 console.log("Script main.js loaded");
 
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    // Setze den aktuellen Modus
-    currentMode = btn.dataset.mode;
+    currentMode = btn.dataset.mode; // Setze den aktuellen Modus entsprechend des Buttons
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
+
+    // Leere den Chat beim Moduswechsel
+    chatDisplay.innerHTML = "";  // Lösche den Chat-Bereich
+    chatHistory = [];  // Leere den Chat-Verlauf
 
     // Hole den entsprechenden Prompt für den aktuellen Modus
     const prompt = modePrompts[currentMode];
 
     if (prompt) {
-      // Setze den Chat-Verlauf mit dem richtigen Prompt
+      // Setze den Chat-Verlauf auf den entsprechenden Prompt
       chatHistory = [{ role: "system", content: prompt }];
-      chatDisplay.innerHTML = "";  // Lösche den Chat-Bereich
     }
   });
 });
-
 
 function addMessage(role, text, isImage = false) {
   const msgWrapper = document.createElement("div");
@@ -132,7 +132,6 @@ function sendMessage() {
 
   if (!text && !imageFile) return;
 
-  // Überprüfe, ob der Evil-Modus aktiviert ist, bevor der Text gesendet wird
   if (currentMode === "evil" && !modeUnlocked?.evil) {
     addMessage("bot", "🚨enter password before you use Evil Mode🚨");
     return;
@@ -144,20 +143,7 @@ function sendMessage() {
   }
 
   if (text) {
-    if (currentMode === "evil") {
-      const msgWrapper = document.createElement("div");
-      msgWrapper.className = `chat-msg-wrapper user`;
-
-      const msg = document.createElement("div");
-      msg.className = `chat-msg user`;
-      msg.textContent = text;
-
-      msgWrapper.appendChild(msg);
-      chatDisplay.appendChild(msgWrapper);
-      chatDisplay.scrollTop = chatDisplay.scrollHeight;
-    } else {
-      addMessage("user", text);
-    }
+    addMessage("user", text);
   }
 
   const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
@@ -243,6 +229,7 @@ themeCheckbox.addEventListener("change", () => {
 });
 
 updateThemeIcon();
+
 
 
 let evilUnlocked = false;
