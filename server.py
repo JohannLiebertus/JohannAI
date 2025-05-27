@@ -67,14 +67,21 @@ def chat():
     mode = data.get("mode", "johann")
     user_msg = data.get("message", "")
 
+    # Sicherstellen, dass der text nicht leer ist
+    if not user_msg.strip():
+        return jsonify({"error": "Nachricht darf nicht leer sein."}), 400
+
     messages = [{"role": "user", "parts": [get_personality(mode)]}]
     for h in history:
         role = "user" if h["role"] == "user" else "model"
         messages.append({"role": role, "parts": [h["content"]]})
     messages.append({"role": "user", "parts": [user_msg]})
 
-    resp = model.generate_content(messages)
-    return jsonify({"response": resp.text})
+    try:
+        resp = model.generate_content(messages)
+        return jsonify({"response": resp.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Endpoint für Bildgenerierung (wird im Frontend über den Modus 'imageAI' aufgerufen)
 @app.route("/chat-image", methods=["POST", "OPTIONS"])
