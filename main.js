@@ -132,8 +132,13 @@ function sendMessage() {
   const text = userInput.value.trim();
   const imageFile = imageInput.files[0];
 
-  if (!text && !imageFile) return;
+  // Verhindere, dass der Request gesendet wird, wenn kein Text eingegeben wurde
+  if (!text && !imageFile) {
+    alert("Bitte gib eine Nachricht ein.");
+    return;
+  }
 
+  // Überprüfen, ob der Evil-Modus aktiviert ist, bevor der Text gesendet wird
   if (currentMode === "evil" && !modeUnlocked?.evil) {
     addMessage("bot", "🚨enter password before you use Evil Mode🚨");
     return;
@@ -183,6 +188,7 @@ function sendMessage() {
   imageInput.value = "";
 }
 
+
 async function handleResponse(res) {
   if (!res.ok) {
     console.error("Serverantwort nicht OK:", res.status);
@@ -214,6 +220,7 @@ async function handleResponse(res) {
     addMessage("bot", data.response || "Keine Antwort vom Bot.");
   }
 }
+
 
 clearBtn.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
