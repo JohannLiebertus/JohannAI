@@ -66,18 +66,22 @@ console.log("Script main.js loaded");
 
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    currentMode = btn.dataset.mode;  // Setze den aktuellen Modus entsprechend des Buttons
+    const mode = btn.dataset.mode; // Den aktuellen Modus von data-mode bekommen
+    currentMode = mode; // Setze den aktuellen Modus auf den Modus aus dem Button
+
+    // Alle Buttons von 'active' entfernen und dem aktuellen Button die 'active' Klasse zuweisen
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    // Lade den passenden Prompt für den ausgewählten Modus
+    // Den entsprechenden Prompt für den gewählten Modus setzen
     const prompt = modePrompts[currentMode];
     if (prompt) {
       chatHistory = [{ role: "system", content: prompt }];
-      chatDisplay.innerHTML = "";  // Lösche die Nachrichten im Chat-Bereich
+      chatDisplay.innerHTML = ""; // Lösche den Chat-Bereich
     }
   });
 });
+
 
 function addMessage(role, text, isImage = false) {
   const msgWrapper = document.createElement("div");
