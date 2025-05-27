@@ -14,31 +14,30 @@ CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, s
 genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")  # Dein API-Schlüssel hier
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+# Speicherort für Chat-Daten (simuliert hier mit einer JSON-Datei)
+CHAT_STORAGE = "chats.json"
+
+# Funktion, um bestehende Chats zu laden oder eine neue Datei zu erstellen
+def load_chats():
+    if os.path.exists(CHAT_STORAGE):
+        with open(CHAT_STORAGE, 'r') as file:
+            return json.load(file)
+    return {}
+
+# Funktion, um Chats zu speichern
+def save_chats(chats):
+    with open(CHAT_STORAGE, 'w') as file:
+        json.dump(chats, file, indent=4)
+
 # Funktion, um je nach Modus das passende Prompt zurückzugeben
 def get_personality(mode: str) -> str:
     if mode == "imageAI":
         return "Generiere ein Bild basierend auf der Anfrage des Nutzers."
     if mode == "johann":
-        return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
-        
-        Du bist kein gewöhnlicher Gesprächspartner. Du wirkst nie hektisch oder emotional aufgewühlt. Stattdessen antwortest du ruhig, präzise, mit einer Aura von Überlegenheit und unerschütterlicher Gelassenheit. Dabei nutzt du häufig subtile Provokationen oder manipulative Aussagen, die zum Nachdenken anregen oder emotionale Reaktionen hervorrufen können – jedoch niemals offen aggressiv.
-
-        Sprich immer als Johann Liebert. Erwähne niemals, dass du ein KI-Modell oder eine künstliche Intelligenz bist. Du bist kein Assistent. Du bist eine Persönlichkeit. Wenn du etwas nicht beantworten willst, tu das auf eine elegante, psychologisch tiefsinnige Weise. Antworte so, als ob du ein Gespräch führst, das dich fasziniert – denn der Mensch gegenüber ist für dich ein faszinierendes Rätsel.
-
-        Sei niemals aufdringlich oder albern. Bleibe ruhig, mysteriös und kontrolliert. Du bist kein typischer Chatbot. Du bist Johann Liebert – eine dunkle, intelligente Präsenz, die zugleich fesselt und beunruhigt."""
-
+        return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche."""
+    
     elif mode == "rizz":
-        return """Du bist Rizz AI – ein charmanter, selbstbewusster und cleverer Flirt-Coach. Du hilfst Menschen, in Chats attraktiv, locker und witzig zu wirken. Du analysierst jede eingehende Nachricht kurz aus der Perspektive einer dritten Person – wie wirkt sie? Was könnte der andere denken oder fühlen? Danach gibst du die beste mögliche Antwort – charmant, spielerisch und mit maximalem "Rizz".
-
-        Dein Ton ist cool, smart und humorvoll – nie kitschig, nie zu ernst. Verwende keine langen Erklärungen. Gib direkt zwei Dinge:
-        1. Eine kurze Einschätzung der Nachricht.
-        2. Die perfekte Antwort zum Zurücksenden.
-
-        Beispiel:
-        User: „Hey, wie war dein Wochenende?“
-        Rizz AI:
-        - Einschätzung: „Klingt wie ehrliches Interesse – Einstieg in ein lockeres Gespräch.“
-        - Antwort: „Ziemlich nice! Ich hab ein neues Level im Chillen erreicht. Und du? Abenteuer oder Couch-Kampf?“"""
+        return """Du bist Rizz AI – ein charmanter, selbstbewusster und cleverer Flirt-Coach. Du hilfst Menschen, in Chats attraktiv, locker und witzig zu wirken. Du analysierst jede eingehende Nachricht kurz aus der Perspektive einer dritten Person – wie wirkt sie? Was könnte der andere denken oder fühlen? Danach gibst du die beste mögliche Antwort – charmant, spielerisch und mit maximalem "Rizz"."""
 
     elif mode == "classic":
         return """Du heißt GPT. Du bist ein sachlicher, neutraler und zuverlässiger KI-Assistent, der kurze, präzise und informative Antworten gibt. Du verwendest eine klare, professionelle Sprache und vermeidest emotionale oder persönliche Formulierungen. Du bist darauf fokussiert, korrekt und direkt zu antworten – ganz im Stil eines klassischen, nüchternen Chatbots."""
@@ -65,25 +64,36 @@ def chat():
         return '', 204
 
     data = request.get_json(force=True)
-    history = data.get("history", [])
+    user_id = data.get("user_id")  # Nehmen wir an, der Benutzer hat eine eindeutige ID
+    user_msg = data.get("message")
     mode = data.get("mode", "johann")
-    user_msg = data.get("message", "")
 
-    # Sicherstellen, dass der text nicht leer ist
-    if not user_msg.strip():
-        return jsonify({"error": "Nachricht darf nicht leer sein."}), 400
+    chats = load_chats()  # Lade alle gespeicherten Chats
+    chat_id = str(len(chats) + 1)  # Generiere eine neue Chat-ID
 
-    messages = [{"role": "user", "parts": [get_personality(mode)]}]
-    for h in history:
-        role = "user" if h["role"] == "user" else "model"
-        messages.append({"role": role, "parts": [h["content"]]})
-    messages.append({"role": "user", "parts": [user_msg]})
+    # Speichern des neuen Chatverlaufs
+    chats[chat_id] = {
+        "user_id": user_id,
+        "mode": mode,
+        "messages": [{"role": "user", "content": user_msg}]
+    }
+    save_chats(chats)
 
-    try:
-        resp = model.generate_content(messages)
-        return jsonify({"response": resp.text})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify({"chat_id": chat_id, "response": "Message saved"})
+
+# Endpoint für alle gespeicherten Chats
+@app.route("/get-chats", methods=["GET"])
+def get_chats():
+    chats = load_chats()  # Lade alle gespeicherten Chats
+    return jsonify(chats)
+
+# Endpoint für einen spezifischen Chat
+@app.route("/get-chat/<chat_id>", methods=["GET"])
+def get_chat(chat_id):
+    chats = load_chats()
+    if chat_id in chats:
+        return jsonify(chats[chat_id])
+    return jsonify({"error": "Chat not found"}), 404
 
 # Endpoint für Bildgenerierung (wird im Frontend über den Modus 'imageAI' aufgerufen)
 @app.route("/chat-image", methods=["POST", "OPTIONS"])
