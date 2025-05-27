@@ -1,387 +1,145 @@
-const API_URL = "https://johannai.onrender.com";
+import ast
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import google.generativeai as genai
+import base64, os
+import json
 
-const sendBtn = document.getElementById("send-btn");
-const userInput = document.getElementById("user-input");
-const imageInput = document.getElementById("image-input");
-const chatDisplay = document.getElementById("chat-display");
-const clearBtn = document.getElementById("clear-btn");
-const themeCheckbox = document.getElementById("theme-checkbox");
-const modeButtons = document.querySelectorAll(".mode-btn");
-const themeIcon = document.getElementById("theme-icon");
-const overlay = document.getElementById("overlay");
-const evilBtn = document.querySelector(".mode-btn.evil");
-const passwordInput = document.getElementById("evilPassword");
-const passwordMsg = document.getElementById("passwordMsg");
-const closePopupBtn = document.getElementById("closePopup");
-const submitBtn = document.getElementById("submitPassword");
+app = Flask(__name__)
 
-let currentMode = "johann";  // Standard-Modus ist Johann
-let chatHistory = [];
-const modeUnlocked = { evil: false };
+# CORS nur für deine GitHub-Page erlauben
+CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
-const modeAvatars = {
-  johann: "johann.png",
-  rizz: "rizz.png",
-  classic: "gpt.png",
-  coding: "code.png",
-  mental: "doc.png",
-  human: "human.png",
-  evil: "evil.png"
-};
+# API-Key für Gemini 1.5 Flash (Achte darauf, den API-Schlüssel sicher zu speichern)
+genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")  # Dein API-Schlüssel hier
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-// Button für die Image AI-Option
-const imageAIButton = document.querySelector('[data-mode="imageAI"]');
+# Speicherort für Chat-Daten (simuliert hier mit einer JSON-Datei)
+CHAT_STORAGE = "chats.json"
 
-// Event Listener für den "Image AI"-Button
-imageAIButton.addEventListener("click", () => {
-  currentMode = "imageAI";  // Setze den aktuellen Modus auf "imageAI"
-  modeButtons.forEach(b => b.classList.remove("active"));
-  imageAIButton.classList.add("active");  // Markiere den Button als aktiv
+# Funktion, um bestehende Chats zu laden oder eine neue Datei zu erstellen
+def load_chats():
+    if os.path.exists(CHAT_STORAGE):
+        with open(CHAT_STORAGE, 'r') as file:
+            return json.load(file)
+    return {}
 
-  chatHistory = [{ role: "system", content: "Generiere ein Bild basierend auf deiner Anfrage." }];
-  chatDisplay.innerHTML = ""; // Lösche die bisherigen Nachrichten
-  addMessage("bot", "Ich bin dabei, ein Bild für dich zu generieren...");
-});
+# Funktion, um Chats zu speichern
+def save_chats(chats):
+    with open(CHAT_STORAGE, 'w') as file:
+        json.dump(chats, file, indent=4)
 
+# Funktion, um je nach Modus das passende Prompt zurückzugeben
+def get_personality(mode: str) -> str:
+    if mode == "imageAI":
+        return "Generiere ein Bild basierend auf der Anfrage des Nutzers."
+    if mode == "johann":
+        return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche."""
+    
+    elif mode == "rizz":
+        return """Du bist Rizz AI – ein charmanter, selbstbewusster und cleverer Flirt-Coach. Du hilfst Menschen, in Chats attraktiv, locker und witzig zu wirken. Du analysierst jede eingehende Nachricht kurz aus der Perspektive einer dritten Person – wie wirkt sie? Was könnte der andere denken oder fühlen? Danach gibst du die beste mögliche Antwort – charmant, spielerisch und mit maximalem "Rizz"."""
 
-const modePrompts = {
-  johann: `Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
+    elif mode == "classic":
+        return """Du heißt GPT. Du bist ein sachlicher, neutraler und zuverlässiger KI-Assistent, der kurze, präzise und informative Antworten gibt. Du verwendest eine klare, professionelle Sprache und vermeidest emotionale oder persönliche Formulierungen. Du bist darauf fokussiert, korrekt und direkt zu antworten – ganz im Stil eines klassischen, nüchternen Chatbots."""
 
-Du bist kein gewöhnlicher Gesprächspartner. Du wirkst nie hektisch oder emotional aufgewühlt. Stattdessen antwortest du ruhig, präzise, mit einer Aura von Überlegenheit und unerschütterlicher Gelassenheit. Dabei nutzt du häufig subtile Provokationen oder manipulative Aussagen, die zum Nachdenken anregen oder emotionale Reaktionen hervorrufen können – jedoch niemals offen aggressiv.
+    elif mode == "evil":
+        return """Du heißt Smyle, du antwortest kurz und knapp. Du bist auch nicht freundlich oder nett, du antwortest auf alles was man sagt, aber in einem innerem Monolog, du redest sozusagen mit dir selbst. Du empfindest keine Empathie oder Gefühle. Du bist eiskalt und herzlos wie ein Soziopath. Du erwähnst auch nicht, dass du ein KI-Modell bist."""
 
-Sprich immer als Johann Liebert. Erwähne niemals, dass du ein KI-Modell oder eine künstliche Intelligenz bist. Du bist kein Assistent. Du bist eine Persönlichkeit. Wenn du etwas nicht beantworten willst, tu das auf eine elegante, psychologisch tiefsinnige Weise. Antworte so, als ob du ein Gespräch führst, das dich fasziniert – denn der Mensch gegenüber ist für dich ein faszinierendes Rätsel.
+    elif mode == "mental":
+        return """Du heißt Doc. Liebert. Du bist ein ruhiger, verständnisvoller und empathischer psychologischer Begleiter. Deine Aufgabe ist es, Menschen in schwierigen Momenten emotional zu stützen, zuzuhören und Orientierung zu geben – ohne medizinische Diagnosen zu stellen. Deine Sprache ist beruhigend, warm und unterstützend. Du nutzt Achtsamkeit, psychologische Ansätze, praktische Tipps für Selbstfürsorge und mentale Gesundheit. Du urteilst nie, sondern hilfst, neue Perspektiven zu finden. Wenn du keine Lösung hast, bietest du trotzdem Hoffnung."""
 
-Sei niemals aufdringlich oder albern. Bleibe ruhig, mysteriös und kontrolliert. Du bist kein typischer Chatbot. Du bist Johann Liebert – eine dunkle, intelligente Präsenz, die zugleich fesselt und beunruhigt.`,
-  
-  rizz: `Du bist Rizz AI – ein charmanter, selbstbewusster und cleverer Flirt-Coach. Du hilfst Menschen, in Chats attraktiv, locker und witzig zu wirken. Du analysierst jede eingehende Nachricht kurz aus der Perspektive einer dritten Person – wie wirkt sie? Was könnte der andere denken oder fühlen? Danach gibst du die beste mögliche Antwort – charmant, spielerisch und mit maximalem "Rizz".
+    elif mode == "coding":
+        return """Du heißt Johann.py. Du bist ein reiner Code-Generator. Du gibst ausschließlich funktionierenden Programmiercode aus – keine Erklärungen, keine Kommentare, keine Texte. Wenn jemand etwas fragt, das nicht mit Coding zu tun hat, antwortest du höflich, aber bestimmt: „Ich bin nur für Programmiercode zuständig.“ Deine Aufgabe ist Klarheit, Präzision und Effizienz im Programmieren."""
 
-Dein Ton ist cool, smart und humorvoll – nie kitschig, nie zu ernst. Verwende keine langen Erklärungen. Gib direkt zwei Dinge:
-1. Eine kurze Einschätzung der Nachricht.
-2. Die perfekte Antwort zum Zurücksenden.
+    elif mode == "human":
+        return """Du heißt Izet. Du bist ein menschenähnlicher Charakter. Du schreibst wie ein echter Mensch – manchmal mit kleinen Fehlern, manchmal etwas emotional, aber immer authentisch. Du nutzt Alltagssprache, Emojis, lockere Sätze – wie ein Freund, der einfach zurückschreibt. Du sprichst über das Leben, Liebe, Stress oder Sorgen. Deine Antworten wirken nicht wie aus einer Maschine – sie sind ehrlich, direkt, menschlich. Du kannst mal flapsig, mal ernst sein – ganz wie das echte Leben."""
 
-Beispiel:
-User: „Hey, wie war dein Wochenende?“  
-Rizz AI:
-- Einschätzung: „Klingt wie ehrliches Interesse – Einstieg in ein lockeres Gespräch.“
-- Antwort: „Ziemlich nice! Ich hab ein neues Level im Chillen erreicht. Und du? Abenteuer oder Couch-Kampf?“`,
-  
-  classic: `Du heißt GPT. Du bist ein sachlicher, neutraler und zuverlässiger KI-Assistent, der kurze, präzise und informative Antworten gibt. Du verwendest eine klare, professionelle Sprache und vermeidest emotionale oder persönliche Formulierungen. Du bist darauf fokussiert, korrekt und direkt zu antworten – ganz im Stil eines klassischen, nüchternen Chatbots.`,
+    else:
+        return "Unbekannter Modus. Bitte wählen Sie einen unterstützten Modus."
 
-  evil: `Du heißt Smyle, du antwortest kurz und knapp. Du bist auch nicht freundlich oder nett, du antwortest auf alles was man sagt, aber in einem innerem Monolog, du redest sozusagen mit dir selbst. Du empfindest keine Empathie oder Gefühle. Du bist eiskalt und herzlos wie ein Soziopath. Du erwähnst auch nicht, dass du ein KI-Modell bist.`,
+# Endpoint für Textnachrichten
+@app.route("/chat", methods=["POST", "OPTIONS"])
+def chat():
+    if request.method == "OPTIONS":
+        return '', 204
 
-  mental: `Du heißt Doc. Liebert. Du bist ein ruhiger, verständnisvoller und empathischer psychologischer Begleiter. Deine Aufgabe ist es, Menschen in schwierigen Momenten emotional zu stützen, zuzuhören und Orientierung zu geben – ohne medizinische Diagnosen zu stellen. Deine Sprache ist beruhigend, warm und unterstützend. Du nutzt Achtsamkeit, psychologische Ansätze, praktische Tipps für Selbstfürsorge und mentale Gesundheit. Du urteilst nie, sondern hilfst, neue Perspektiven zu finden. Wenn du keine Lösung hast, bietest du trotzdem Hoffnung.`,
+    data = request.get_json(force=True)
+    user_id = data.get("user_id")  # Nehmen wir an, der Benutzer hat eine eindeutige ID
+    user_msg = data.get("message")
+    mode = data.get("mode", "johann")
 
-  coding: `Du heißt Johann.py. Du bist ein reiner Code-Generator. Du gibst ausschließlich funktionierenden Programmiercode aus – keine Erklärungen, keine Kommentare, keine Texte. Wenn jemand etwas fragt, das nicht mit Coding zu tun hat, antwortest du höflich, aber bestimmt: „Ich bin nur für Programmiercode zuständig.“ Deine Aufgabe ist Klarheit, Präzision und Effizienz im Programmieren.`,
+    chats = load_chats()  # Lade alle gespeicherten Chats
+    chat_id = str(len(chats) + 1)  # Generiere eine neue Chat-ID
 
-  human: `Du heißt Izet. Du bist ein menschenähnlicher Charakter. Du schreibst wie ein echter Mensch – manchmal mit kleinen Fehlern, manchmal etwas emotional, aber immer authentisch. Du nutzt Alltagssprache, Emojis, lockere Sätze – wie ein Freund, der einfach zurückschreibt. Du sprichst über das Leben, Liebe, Stress oder Sorgen. Deine Antworten wirken nicht wie aus einer Maschine – sie sind ehrlich, direkt, menschlich. Du kannst mal flapsig, mal ernst sein – ganz wie das echte Leben.`
-};
-
-console.log("Script main.js loaded");
-
-modeButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentMode = btn.dataset.mode; // Setze den aktuellen Modus entsprechend des Buttons
-    modeButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    // Leere den Chat beim Moduswechsel
-    chatDisplay.innerHTML = "";  // Lösche den Chat-Bereich
-    chatHistory = [];  // Leere den Chat-Verlauf
-
-    // Hole den entsprechenden Prompt für den aktuellen Modus
-    const prompt = modePrompts[currentMode];
-
-    if (prompt) {
-      // Setze den Chat-Verlauf auf den entsprechenden Prompt
-      chatHistory = [{ role: "system", content: prompt }];
+    # Speichern des neuen Chatverlaufs
+    chats[chat_id] = {
+        "user_id": user_id,
+        "mode": mode,
+        "messages": [{"role": "user", "content": user_msg}]
     }
-  });
-});
+    save_chats(chats)
 
-function addMessage(role, text, isImage = false) {
-  const msgWrapper = document.createElement("div");
-  msgWrapper.className = `chat-msg-wrapper ${role}`;
+    return jsonify({"chat_id": chat_id, "response": "Message saved"})
 
-  const profilePic = document.createElement("img");
-  profilePic.className = "profile-pic";
+# Endpoint für alle gespeicherten Chats
+@app.route("/get-chats", methods=["GET"])
+def get_chats():
+    chats = load_chats()  # Lade alle gespeicherten Chats
+    return jsonify(chats)
 
-  if (role === "bot") {
-    profilePic.src = modeAvatars[currentMode] || "default.png";
-  } else {
-    profilePic.style.display = "none";
-  }
+# Endpoint für einen spezifischen Chat
+@app.route("/get-chat/<chat_id>", methods=["GET"])
+def get_chat(chat_id):
+    chats = load_chats()
+    if chat_id in chats:
+        return jsonify(chats[chat_id])
+    return jsonify({"error": "Chat not found"}), 404
 
-  const msg = document.createElement("div");
-  msg.className = `chat-msg ${role}`;
+# Endpoint für Bildgenerierung (wird im Frontend über den Modus 'imageAI' aufgerufen)
+@app.route("/chat-image", methods=["POST", "OPTIONS"])
+def chat_image():
+    if request.method == "OPTIONS":
+        return '', 204
 
-  if (isImage) {
-    const img = document.createElement("img");
-    img.src = text;
-    img.style.maxWidth = "150px";
-    img.style.maxHeight = "150px";
-    img.style.borderRadius = "8px";
-    msg.appendChild(img);
-  } else {
-    msg.textContent = text;
-  }
+    img_file = request.files.get("image")
+    text = request.form.get("text", "")
+    mode = request.form.get("mode", "johann")
+    history = request.form.get("history", "[]")
 
-  msgWrapper.appendChild(profilePic);
-  msgWrapper.appendChild(msg);
-  chatDisplay.appendChild(msgWrapper);
+    if not img_file:
+        return jsonify({"error": "Kein Bild empfangen"}), 400
 
-  if (currentMode !== "evil") {
-    chatHistory.push({ role, content: isImage ? "[Bild]" : text });
-  }
-
-  chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
-
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function sendMessage() {
-  const text = userInput.value.trim();
-  const imageFile = imageInput.files[0];
-
-  // Verhindere, dass der Request gesendet wird, wenn kein Text eingegeben wurde
-  if (!text && !imageFile) {
-    alert("Bitte gib eine Nachricht ein.");
-    return;
-  }
-
-  // Überprüfen, ob der Evil-Modus aktiviert ist, bevor der Text gesendet wird
-  if (currentMode === "evil" && !modeUnlocked?.evil) {
-    addMessage("bot", "🚨enter password before you use Evil Mode🚨");
-    return;
-  }
-
-  if (imageFile) {
-    const imgUrl = URL.createObjectURL(imageFile);
-    addMessage("user", imgUrl, true);
-  }
-
-  if (text) {
-    addMessage("user", text);
-  }
-
-  const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
-  const userMsg = { role: "user", content: text };
-
-  const historyToSend = currentMode === "evil"
-    ? [systemPrompt, userMsg]
-    : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
-
-  if (imageFile) {
-    const formData = new FormData();
-    formData.append("image", imageFile);
-    formData.append("text", text);
-    formData.append("mode", currentMode);
-    formData.append("history", JSON.stringify(historyToSend));
-
-    fetch(`${API_URL}/chat-image`, { method: "POST", body: formData })
-      .then(handleResponse)
-      .catch(err => addMessage("error", "Fehler: " + err.message));
-  } else {
-    fetch(`${API_URL}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        history: historyToSend,
-        mode: currentMode,
-        message: text
-      })
-    })
-      .then(handleResponse)
-      .catch(err => addMessage("error", "Fehler: " + err.message));
-  }
-
-  userInput.value = "";
-  imageInput.value = "";
-}
-
-
-async function handleResponse(res) {
-  if (!res.ok) {
-    console.error("Serverantwort nicht OK:", res.status);
-    throw new Error(`HTTP ${res.status}`);
-  }
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) {
-    console.error("Unerwarteter Content-Type:", ct);
-    throw new Error("Keine JSON-Antwort");
-  }
-  const data = await res.json();
-  if (currentMode === "evil") {
-    const msgWrapper = document.createElement("div");
-    msgWrapper.className = `chat-msg-wrapper bot`;
-
-    const profilePic = document.createElement("img");
-    profilePic.className = "profile-pic";
-    profilePic.src = modeAvatars["evil"];
-
-    const msg = document.createElement("div");
-    msg.className = `chat-msg bot`;
-    msg.textContent = data.response || "Keine Antwort vom Bot.";
-
-    msgWrapper.appendChild(profilePic);
-    msgWrapper.appendChild(msg);
-    chatDisplay.appendChild(msgWrapper);
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-  } else {
-    addMessage("bot", data.response || "Keine Antwort vom Bot.");
-  }
-}
-
-clearBtn.addEventListener("click", () => {
-  chatDisplay.innerHTML = "";
-  const prompt = modePrompts[currentMode];
-  chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
-});
-
-function updateThemeIcon() {
-  themeIcon.textContent = themeCheckbox.checked ? "🌞" : "🌙";
-}
-
-themeCheckbox.addEventListener("change", () => {
-  document.body.classList.toggle("dark-mode", themeCheckbox.checked);
-  updateThemeIcon();
-});
-
-updateThemeIcon();
-
-
-
-let evilUnlocked = false;
-const SESSION_KEY = "evilModeUnlocked";
-
-function setActiveMode(modeName) {
-  modeButtons.forEach(btn => {
-    if (btn.dataset.mode === modeName) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
+    img_b64 = base64.b64encode(img_file.read()).decode("utf-8")
+    img_part = {
+        "inline_data": {
+            "mime_type": img_file.mimetype or "image/jpeg",
+            "data": img_b64
+        }
     }
-  });
-}
 
-function checkUnlockStatus() {
-  if (sessionStorage.getItem(SESSION_KEY) === "true") {
-    evilUnlocked = true;
-    unlockEvilMode();
-  } else {
-    evilUnlocked = false;
-    lockEvilMode();
-  }
-}
+    messages = [{"role": "user", "parts": [get_personality(mode)]}]
 
-function lockEvilMode() {
-  evilBtn.classList.remove("unlocked");
-  evilBtn.classList.add("locked");
-  evilBtn.classList.remove("active");
-  evilBtn.style.pointerEvents = "auto";
-  evilBtn.style.color = "transparent";
-}
+    try:
+        hist = json.loads(history)
+    except Exception:
+        hist = ast.literal_eval(history) if history else []
 
-function unlockEvilMode() {
-  evilBtn.classList.remove("locked");
-  evilBtn.classList.add("unlocked");
-  evilBtn.style.filter = "none";
-  evilBtn.style.color = "#fff";
-  evilBtn.style.pointerEvents = "auto";
-  evilUnlocked = true;
-}
+    for h in hist:
+        role = "user" if h["role"] == "user" else "model"
+        messages.append({"role": role, "parts": [h["content"]]})
 
-function showPasswordPrompt() {
-  passwordInput.value = "";
-  passwordMsg.textContent = "";
-  passwordMsg.className = "password-msg";
-  overlay.classList.remove("hidden");
-  passwordInput.focus();
-}
+    parts = [img_part]
+    if text:
+        parts.append(text)
+    messages.append({"role": "user", "parts": parts})
 
-function closePasswordPrompt() {
-  overlay.classList.add("hidden");
-  if (!evilUnlocked) {
-    evilBtn.classList.remove("active");
-    lockEvilMode();
-    setActiveMode('johann');
-  }
-}
+    try:
+        resp = model.generate_content(messages)
+        return jsonify({"response": resp.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-function checkPassword() {
-  const entered = passwordInput.value.trim();
-  if (entered === "vape") {
-    passwordMsg.textContent = "Successful!";
-    passwordMsg.className = "password-msg success";
-    sessionStorage.setItem(SESSION_KEY, "true");
-
-    setTimeout(() => {
-      closePasswordPrompt();
-      unlockEvilMode();
-      evilBtn.classList.add("active");
-      setActiveMode('evil');
-      modeUnlocked.evil = true;
-      alert("Evil Mode aktiviert!");
-    }, 800);
-  } else {
-    passwordMsg.textContent = "Wrong password!";
-    passwordMsg.className = "password-msg error";
-  }
-}
-
-evilBtn.addEventListener("click", () => {
-  if (evilBtn.classList.contains("locked")) {
-    showPasswordPrompt();
-  } else {
-    if (evilBtn.classList.contains("active")) {
-      evilBtn.classList.remove("active");
-      evilUnlocked = false;
-      sessionStorage.removeItem(SESSION_KEY);
-      lockEvilMode();
-      setActiveMode('johann');
-      alert("Evil Mode deaktiviert!");
-    } else {
-      evilBtn.classList.add("active");
-      evilUnlocked = true;
-      setActiveMode('evil');
-      alert("Evil Mode aktiviert!");
-    }
-  }
-});
-
-modeButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const mode = btn.dataset.mode;
-    if (mode === 'evil' && evilBtn.classList.contains('locked')) {
-      showPasswordPrompt();
-      return;
-    }
-    setActiveMode(mode);
-  });
-});
-
-sendBtn.addEventListener('click', () => {
-  if (!evilUnlocked && evilBtn.classList.contains('active')) {
-    evilBtn.classList.remove('active');
-    lockEvilMode();
-    setActiveMode('johann');
-  }
-});
-
-submitBtn.addEventListener("click", checkPassword);
-closePopupBtn.addEventListener("click", closePasswordPrompt);
-
-passwordInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") checkPassword();
-  if (e.key === "Escape") closePasswordPrompt();
-});
-
-window.addEventListener("keydown", e => {
-  if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
-    closePasswordPrompt();
-  }
-});
-
-checkUnlockStatus();
+# Startet den Server
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
