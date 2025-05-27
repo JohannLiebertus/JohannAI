@@ -66,29 +66,32 @@ console.log("Script main.js loaded");
 
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    const mode = btn.dataset.mode; // Den aktuellen Modus von data-mode bekommen
+    // Überprüfen, ob der Button für den Evil Mode ist
+    const mode = btn.dataset.mode;
+
+    // Wenn der Evil Mode gedrückt wird, rufe den Passwort-Prompt auf
     if (mode === "evil") {
-      // Falls der Evil Mode gedrückt wird, rufe den Passwort-Prompt auf
       showPasswordPrompt();
-      return;
+      return; // Verhindert, dass der Rest des Codes ausgeführt wird
     }
 
-    currentMode = mode; // Setze den aktuellen Modus auf den Modus aus dem Button
+    // Wenn der Modus nicht "evil" ist, setze den entsprechenden Modus
+    currentMode = mode;
 
-    // Alle Buttons von 'active' entfernen und dem aktuellen Button die 'active' Klasse zuweisen
+    // Setze alle Buttons zurück und markiere den aktuellen Button als aktiv
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    // Den entsprechenden Prompt für den gewählten Modus setzen
+    // Hole den Prompt für den aktuellen Modus
     const prompt = modePrompts[currentMode];
+
     if (prompt) {
+      // Setze den Chat-Verlauf auf den entsprechenden Prompt
       chatHistory = [{ role: "system", content: prompt }];
       chatDisplay.innerHTML = ""; // Lösche den Chat-Bereich
     }
   });
 });
-
-
 
 function addMessage(role, text, isImage = false) {
   const msgWrapper = document.createElement("div");
@@ -250,6 +253,7 @@ themeCheckbox.addEventListener("change", () => {
 });
 
 updateThemeIcon();
+
 
 let evilUnlocked = false;
 const SESSION_KEY = "evilModeUnlocked";
