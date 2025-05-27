@@ -14,10 +14,8 @@ const passwordInput = document.getElementById("evilPassword");
 const passwordMsg = document.getElementById("passwordMsg");
 const closePopupBtn = document.getElementById("closePopup");
 const submitBtn = document.getElementById("submitPassword");
-const chatSelect = document.getElementById("chat-select");  // Dropdown für Chats
 
 let currentMode = "johann";  // Standard-Modus ist Johann
-let currentChatId = null; // Die ID des aktuell ausgewählten Chats
 let chatHistory = [];
 const modeUnlocked = { evil: false };
 
@@ -30,6 +28,8 @@ const modeAvatars = {
   human: "human.png",
   evil: "evil.png"
 };
+
+
 
 const modePrompts = {
   johann: `Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
@@ -85,7 +85,6 @@ modeButtons.forEach(btn => {
   });
 });
 
-// Funktion zum Hinzufügen von Nachrichten
 function addMessage(role, text, isImage = false) {
   const msgWrapper = document.createElement("div");
   msgWrapper.className = `chat-msg-wrapper ${role}`;
@@ -124,34 +123,21 @@ function addMessage(role, text, isImage = false) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-// Event-Listener für das Senden von Nachrichten
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keypress", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-// Nachricht senden
 function sendMessage() {
   const text = userInput.value.trim();
   const imageFile = imageInput.files[0];
 
-  // Verhindere, dass der Request gesendet wird, wenn kein Text eingegeben wurde
-  if (!text && !imageFile) {
-    alert("Bitte gib eine Nachricht ein.");
+  if (!text && !imageFile) return;
+
+  if (currentMode === "evil" && !modeUnlocked?.evil) {
+    addMessage("bot", "🚨enter password before you use Evil Mode🚨");
     return;
   }
-
-  if (!currentChatId) {
-    alert("Bitte wähle einen Chat aus oder erstelle einen neuen.");
-    return;
-  }
-
-  const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
-  const userMsg = { role: "user", content: text };
-
-  const historyToSend = currentMode === "evil"
-    ? [systemPrompt, userMsg]
-    : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
 
   if (imageFile) {
     const imgUrl = URL.createObjectURL(imageFile);
@@ -162,97 +148,87 @@ function sendMessage() {
     addMessage("user", text);
   }
 
-  fetch(`${API_URL}/chat-message`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: currentChatId,
-      message: text,
-      role: "user"
+  const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
+  const userMsg = { role: "user", content: text };
+
+  const historyToSend = currentMode === "evil"
+    ? [systemPrompt, userMsg]
+    : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
+
+  if (imageFile) {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    formData.append("text", text);
+    formData.append("mode", currentMode);
+    formData.append("history", JSON.stringify(historyToSend));
+
+    fetch(`${API_URL}/chat-image`, { method: "POST", body: formData })
+      .then(handleResponse)
+      .catch(err => addMessage("error", "Fehler: " + err.message));
+  } else {
+    fetch(`${API_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        history: historyToSend,
+        mode: currentMode,
+        message: text
+      })
     })
-  })
-    .then(handleResponse)
-    .catch(err => addMessage("error", "Fehler: " + err.message));
+      .then(handleResponse)
+      .catch(err => addMessage("error", "Fehler: " + err.message));
+  }
 
   userInput.value = "";
   imageInput.value = "";
 }
 
-// Antwort vom Server verarbeiten
 async function handleResponse(res) {
   if (!res.ok) {
     console.error("Serverantwort nicht OK:", res.status);
     throw new Error(`HTTP ${res.status}`);
   }
-  const data = await res.json();
-  addMessage("bot", data.response || "Keine Antwort vom Bot.");
-}
-
-// Laden der Chats und deren Nachrichten
-chatSelect.addEventListener("change", () => {
-  const chatId = chatSelect.value;
-  if (chatId) {
-    fetch(`${API_URL}/get-chat/${chatId}`)
-      .then(response => response.json())
-      .then(chat => {
-        currentChatId = chatId;
-        chatHistory = chat.messages;
-        displayMessages(chatHistory);
-      })
-      .catch(error => console.error('Error loading chat:', error));
+  const ct = res.headers.get("content-type") || "";
+  if (!ct.includes("application/json")) {
+    console.error("Unerwarteter Content-Type:", ct);
+    throw new Error("Keine JSON-Antwort");
   }
-}); // Diese schließende Klammer war fehlend
-
-
-// Alle Chats laden
-function loadChats() {
-  fetch(`${API_URL}/get-chats`)
-    .then(response => response.json())
-    .then(chats => {
-      chatSelect.innerHTML = "";
-      Object.keys(chats.chats).forEach(chatId => {
-        const option = document.createElement("option");
-        option.value = chatId;
-        option.textContent = `Chat ${chatId}`;
-        chatSelect.appendChild(option);
-      });
-    })
-    .catch(error => console.error('Error loading chats:', error));
-}
-
-// Chatnachrichten anzeigen
-function displayMessages(messages) {
-  chatDisplay.innerHTML = "";
-  messages.forEach(msg => {
+  const data = await res.json();
+  if (currentMode === "evil") {
     const msgWrapper = document.createElement("div");
-    msgWrapper.className = `chat-msg-wrapper ${msg.role}`;
-    const msgElement = document.createElement("div");
-    msgElement.className = "chat-msg";
-    msgElement.textContent = msg.content;
-    msgWrapper.appendChild(msgElement);
+    msgWrapper.className = `chat-msg-wrapper bot`;
+
+    const profilePic = document.createElement("img");
+    profilePic.className = "profile-pic";
+    profilePic.src = modeAvatars["evil"];
+
+    const msg = document.createElement("div");
+    msg.className = `chat-msg bot`;
+    msg.textContent = data.response || "Keine Antwort vom Bot.";
+
+    msgWrapper.appendChild(profilePic);
+    msgWrapper.appendChild(msg);
     chatDisplay.appendChild(msgWrapper);
-  });
-  chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+  } else {
+    addMessage("bot", data.response || "Keine Antwort vom Bot.");
+  }
 }
 
-// Neuen Chat erstellen
 clearBtn.addEventListener("click", () => {
-  fetch(`${API_URL}/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ history: [] })
-  })
-    .then(response => response.json())
-    .then(data => {
-      currentChatId = data.chat_id;
-      chatHistory = [];
-      loadChats();
-    })
-    .catch(error => console.error('Error creating new chat:', error));
+  chatDisplay.innerHTML = "";
+  const prompt = modePrompts[currentMode];
+  chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
 });
 
-// Initiale Lade der Chats
-loadChats();
+function updateThemeIcon() {
+  themeIcon.textContent = themeCheckbox.checked ? "🌞" : "🌙";
+}
+
+themeCheckbox.addEventListener("change", () => {
+  document.body.classList.toggle("dark-mode", themeCheckbox.checked);
+  updateThemeIcon();
+});
 
 updateThemeIcon();
 
@@ -355,8 +331,6 @@ evilBtn.addEventListener("click", () => {
     }
   }
 });
-
-
 
 modeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
