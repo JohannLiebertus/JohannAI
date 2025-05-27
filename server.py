@@ -1,7 +1,9 @@
+import ast
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 import base64, os
+import json
 
 app = Flask(__name__)
 
@@ -107,7 +109,6 @@ def chat_image():
 
     messages = [{"role": "user", "parts": [get_personality(mode)]}]
 
-    import json, ast
     try:
         hist = json.loads(history)
     except Exception:
@@ -122,8 +123,11 @@ def chat_image():
         parts.append(text)
     messages.append({"role": "user", "parts": parts})
 
-    resp = model.generate_content(messages)
-    return jsonify({"response": resp.text})
+    try:
+        resp = model.generate_content(messages)
+        return jsonify({"response": resp.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Startet den Server
 if __name__ == "__main__":
