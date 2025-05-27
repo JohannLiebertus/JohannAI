@@ -46,42 +46,26 @@ body {
     font-weight: bold;
     color: red;
     margin: 0;
-    position: relative;
-    animation: glow 1.5s infinite alternate;
+    overflow: hidden; /* Verhindert das Überlaufen des Textes während der Animation */
+    border-right: 4px solid red; /* Der blinkende Cursor */
+    white-space: nowrap; /* Verhindert Zeilenumbruch */
+    animation: typing 3s steps(30) 1s 1 normal both, blink 0.75s step-end infinite; /* Animation für den Typewriter-Effekt */
 }
 
-/* Glühende Animation */
-@keyframes glow {
-    0% {
-        text-shadow: 0 0 5px red, 0 0 10px red, 0 0 15px darkred, 0 0 20px darkred;
+/* Typewriter-Effekt */
+@keyframes typing {
+    from {
+        width: 0;
     }
-    100% {
-        text-shadow: 0 0 10px red, 0 0 20px red, 0 0 30px darkred, 0 0 40px darkred;
+    to {
+        width: 100%;
     }
 }
 
-/* Blutstropfen-Animation */
-.title-bar h1::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -10px;
-    width: 5px;
-    height: 5px;
-    background-color: darkred;
-    border-radius: 50%;
-    animation: bloodDrop 1s infinite linear;
-}
-
-/* Tropfenanimation */
-@keyframes bloodDrop {
-    0% {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-    100% {
-        transform: translateX(-50%) translateY(20px);
-        opacity: 0;
+/* Blinkender Cursor-Effekt */
+@keyframes blink {
+    50% {
+        border-color: transparent;
     }
 }
 
