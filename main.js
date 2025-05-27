@@ -29,6 +29,21 @@ const modeAvatars = {
   evil: "evil.png"
 };
 
+// Button für die Image AI-Option
+const imageAIButton = document.querySelector('[data-mode="imageAI"]');
+
+// Event Listener für den "Image AI"-Button
+imageAIButton.addEventListener("click", () => {
+  currentMode = "imageAI";  // Setze den aktuellen Modus auf "imageAI"
+  modeButtons.forEach(b => b.classList.remove("active"));
+  imageAIButton.classList.add("active");  // Markiere den Button als aktiv
+
+  chatHistory = [{ role: "system", content: "Generiere ein Bild basierend auf deiner Anfrage." }];
+  chatDisplay.innerHTML = ""; // Lösche die bisherigen Nachrichten
+  addMessage("bot", "Ich bin dabei, ein Bild für dich zu generieren...");
+});
+
+
 const modePrompts = {
   johann: `Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
 
