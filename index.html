@@ -1,71 +1,171 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Johann M – by Lächelmann</title>
-  <link rel="stylesheet" href="style.css" />  <!-- Verlinkung der externen CSS Datei -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <style>
+        /* Einfache Styles für das Chat-Interface */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        #chat-display {
+            margin: 20px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-msg-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chat-msg-wrapper.user {
+            justify-content: flex-end;
+        }
+
+        .chat-msg-wrapper.bot {
+            justify-content: flex-start;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat-msg {
+            max-width: 60%;
+            padding: 10px;
+            background-color: #e1e1e1;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 16px;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-container input {
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #chat-select {
+            margin: 10px;
+            padding: 5px;
+        }
+
+        .mode-btn {
+            margin: 10px;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #ddd;
+        }
+
+        .mode-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .theme-checkbox {
+            margin: 10px;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #333;
+            color: white;
+        }
+
+        body.dark-mode #chat-display {
+            background-color: #444;
+        }
+
+        body.dark-mode .chat-msg {
+            background-color: #666;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container">
 
-    <div class="rainbow-bar"></div>
+    <div class="container">
+        <h1>Chat Interface</h1>
 
-    <div class="title-bar">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <h1 id="title">Johann AI by Smyle</h1>
-        <span class="version-text">Version: Alpha 2.1</span>
-      </div>
-      <div style="display:flex;align-items:center;">
-        <span id="theme-icon">🌙</span>
-        <label class="theme-toggle" style="margin:0;">
-          <input type="checkbox" id="theme-checkbox" />
-          <span class="slider"></span>
-        </label>
-      </div>
+        <!-- Dropdown für Chats -->
+        <select id="chat-select">
+            <option value="">Wählen Sie einen Chat</option>
+        </select>
+
+        <!-- Chat Nachrichten anzeigen -->
+        <div id="chat-display"></div>
+
+        <!-- Chatnachricht Eingabe -->
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Nachricht eingeben">
+            <button id="send-btn">Senden</button>
+        </div>
+
+        <!-- Optionen für den Modus -->
+        <div id="mode-buttons">
+            <button class="mode-btn" data-mode="johann">Johann</button>
+            <button class="mode-btn" data-mode="rizz">Rizz</button>
+            <button class="mode-btn" data-mode="classic">Classic</button>
+            <button class="mode-btn" data-mode="coding">Coding</button>
+            <button class="mode-btn" data-mode="mental">Mental</button>
+            <button class="mode-btn" data-mode="human">Human</button>
+            <button class="mode-btn evil">Evil</button>
+        </div>
+
+        <!-- Checkbox für Dark Mode -->
+        <div class="theme-checkbox">
+            <label for="theme-checkbox">🌙 / 🌞</label>
+            <input type="checkbox" id="theme-checkbox">
+        </div>
+
+        <!-- Passwort-Popup für Evil Mode -->
+        <div id="overlay" class="hidden">
+            <div id="password-popup">
+                <input type="password" id="evilPassword" placeholder="Passwort eingeben">
+                <button id="submitPassword">Einloggen</button>
+                <button id="closePopup">Abbrechen</button>
+                <p id="passwordMsg"></p>
+            </div>
+        </div>
     </div>
 
-    <div class="chat-display" id="chat-display"></div>
+    <!-- JavaScript Integration -->
+    <script src="main.js"></script>
 
-    <div class="input-section">
-      <input type="text" id="user-input" placeholder="Nachricht eingeben...">
-      <input type="file" id="image-input" accept="image/*" style="display:none;">
-      <label for="image-input" class="file-btn" title="Bild anhängen">📎</label>
-      <button id="send-btn" class="send-btn">Senden</button>
-    </div>
-
-<div class="mode-switch">
-  <button class="mode-btn active" data-mode="johann">☝ Johann</button>
-  <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-  <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-  <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-  <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-  <button class="mode-btn" data-mode="human">Human AI 👤</button>
-  
-  <button class="mode-btn" data-mode="imageAI">🖼️ Image AI</button> <!-- Neuer Button -->
-  
-  <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
-</div>
-
-
-    <div class="extra-buttons">
-      <button class="extra" id="clear-btn">Clear</button>
-    </div>
-
-    <!-- Overlay für die Passwortabfrage -->
-    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
-      <div class="popup">
-        <span class="close-btn" id="closePopup" title="Schließen">×</span>
-        <p id="popupTitle">Enter password to unlock Evil Mode:</p>
-        <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
-        <div id="passwordMsg" class="password-msg"></div>
-        <button class="submit-btn" id="submitPassword">Submit</button>
-      </div>
-    </div>
-
-  </div>
-
-  <script src="main.js"></script>  <!-- Verlinkung der externen JS Datei -->
 </body>
+
 </html>
