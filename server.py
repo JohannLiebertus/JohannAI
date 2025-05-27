@@ -8,11 +8,14 @@ app = Flask(__name__)
 # CORS nur für deine GitHub-Page erlauben
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
-# API-Key direkt hier (nicht empfohlen für Produktion)
-genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")
+# API-Key für Gemini 1.5 Flash (Achte darauf, den API-Schlüssel sicher zu speichern)
+genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")  # Dein API-Schlüssel hier
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+# Funktion, um je nach Modus das passende Prompt zurückzugeben
 def get_personality(mode: str) -> str:
+    if mode == "imageAI":
+        return "Generiere ein Bild basierend auf der Anfrage des Nutzers."
     if mode == "johann":
         return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
         
@@ -53,7 +56,7 @@ def get_personality(mode: str) -> str:
     else:
         return "Unbekannter Modus. Bitte wählen Sie einen unterstützten Modus."
 
-
+# Endpoint für Textnachrichten
 @app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
     if request.method == "OPTIONS":
@@ -73,6 +76,7 @@ def chat():
     resp = model.generate_content(messages)
     return jsonify({"response": resp.text})
 
+# Endpoint für Bildgenerierung (wird im Frontend über den Modus 'imageAI' aufgerufen)
 @app.route("/chat-image", methods=["POST", "OPTIONS"])
 def chat_image():
     if request.method == "OPTIONS":
@@ -101,6 +105,7 @@ def chat_image():
         hist = json.loads(history)
     except Exception:
         hist = ast.literal_eval(history) if history else []
+
     for h in hist:
         role = "user" if h["role"] == "user" else "model"
         messages.append({"role": role, "parts": [h["content"]]})
@@ -113,6 +118,7 @@ def chat_image():
     resp = model.generate_content(messages)
     return jsonify({"response": resp.text})
 
+# Startet den Server
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
