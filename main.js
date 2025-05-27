@@ -15,7 +15,7 @@ const passwordMsg = document.getElementById("passwordMsg");
 const closePopupBtn = document.getElementById("closePopup");
 const submitBtn = document.getElementById("submitPassword");
 
-let currentMode = "johann";
+let currentMode = "johann";  // Standard-Modus ist Johann
 let chatHistory = [];
 const modeUnlocked = { evil: false };
 
@@ -61,18 +61,19 @@ Rizz AI:
   human: `Du heißt Izet. Du bist ein menschenähnlicher Charakter. Du schreibst wie ein echter Mensch – manchmal mit kleinen Fehlern, manchmal etwas emotional, aber immer authentisch. Du nutzt Alltagssprache, Emojis, lockere Sätze – wie ein Freund, der einfach zurückschreibt. Du sprichst über das Leben, Liebe, Stress oder Sorgen. Deine Antworten wirken nicht wie aus einer Maschine – sie sind ehrlich, direkt, menschlich. Du kannst mal flapsig, mal ernst sein – ganz wie das echte Leben.`
 };
 
+
 console.log("Script main.js loaded");
 
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    currentMode = btn.dataset.mode;
+    currentMode = btn.dataset.mode;  // Setze den aktuellen Modus entsprechend des Buttons
     modeButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
     const prompt = modePrompts[currentMode];
     if (prompt) {
       chatHistory = [{ role: "system", content: prompt }];
-      chatDisplay.innerHTML = "";
+      chatDisplay.innerHTML = "";  // Lösche die Nachrichten im Chat-Bereich
     }
   });
 });
