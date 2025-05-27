@@ -67,6 +67,12 @@ console.log("Script main.js loaded");
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     const mode = btn.dataset.mode; // Den aktuellen Modus von data-mode bekommen
+    if (mode === "evil") {
+      // Falls der Evil Mode gedrückt wird, rufe den Passwort-Prompt auf
+      showPasswordPrompt();
+      return;
+    }
+
     currentMode = mode; // Setze den aktuellen Modus auf den Modus aus dem Button
 
     // Alle Buttons von 'active' entfernen und dem aktuellen Button die 'active' Klasse zuweisen
@@ -81,6 +87,7 @@ modeButtons.forEach(btn => {
     }
   });
 });
+
 
 
 function addMessage(role, text, isImage = false) {
