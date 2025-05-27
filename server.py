@@ -42,7 +42,6 @@ def get_personality(mode: str) -> str:
     else:
         return "Unbekannter Modus. Bitte wählen Sie einen unterstützten Modus."
 
-
 # Endpoint für Bildgenerierung (wird im Frontend über den Modus 'imageAI' aufgerufen)
 @app.route("/chat-image", methods=["POST", "OPTIONS"])
 def chat_image():
@@ -86,7 +85,6 @@ def chat_image():
         return jsonify({"response": resp.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # Startet den Server
 if __name__ == "__main__":
