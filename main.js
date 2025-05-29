@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  
   const API_URL = "https://johannai.onrender.com";
 
   const sendBtn = document.getElementById("send-btn");
@@ -316,6 +317,5 @@ Rizz AI:
   bindModeButtons();
 
   // Weitere Event-Listener (Senden, Eingabe, Clear) hier falls benötigt
-  checkUnlockStatus();
   console.log("Script main.js loaded");
 });
