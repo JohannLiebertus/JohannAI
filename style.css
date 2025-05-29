@@ -1,6 +1,9 @@
 .hidden {
-  display: none !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
+
 
 
 
@@ -922,23 +925,24 @@ body.dark-mode .extra {
   top: 0;
   right: 0;
   width: 300px;
-  max-width: 80%;
   height: 100%;
   background-color: rgba(34, 34, 34, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.8);
-  transform: translateX(100%); /* Start: komplett rechts draußen */
-  transition: transform 0.35s ease-in-out;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out;
   z-index: 1001;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  color: white;
+  display: block;
+  pointer-events: none;
 }
 
 
+
 .mode-sidebar.open {
-  transform: translateX(0); /* Rein sliden */
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 
