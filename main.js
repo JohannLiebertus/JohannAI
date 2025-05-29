@@ -73,6 +73,7 @@ Rizz AI:
   }
 
   function closePasswordPrompt() {
+    console.log("Popup wird geschlossen");
     overlay.classList.add("hidden");
     if (!evilUnlocked) {
       evilBtn.classList.remove("active");
@@ -80,6 +81,26 @@ Rizz AI:
       setActiveMode("johann");
     }
   }
+
+  function checkPassword() {
+    console.log("Passwort wird geprüft");
+    const entered = passwordInput.value.trim();
+    if (entered === "vape") {
+      passwordMsg.textContent = "Successful!";
+      passwordMsg.className = "password-msg success";
+      sessionStorage.setItem("evilModeUnlocked", "true");
+
+      setTimeout(() => {
+        closePasswordPrompt();
+        unlockEvilMode();
+        setActiveMode("evil");
+      }, 600);
+    } else {
+      passwordMsg.textContent = "Wrong password!";
+      passwordMsg.className = "password-msg error";
+    }
+  }
+
 
   function unlockEvilMode() {
     evilUnlocked = true;
@@ -101,23 +122,6 @@ Rizz AI:
     alert("Evil Mode deaktiviert!");
   }
 
-  function checkPassword() {
-    const entered = passwordInput.value.trim();
-    if (entered === "vape") {
-      passwordMsg.textContent = "Successful!";
-      passwordMsg.className = "password-msg success";
-      sessionStorage.setItem("evilModeUnlocked", "true");
-
-      setTimeout(() => {
-        closePasswordPrompt();
-        unlockEvilMode();
-        setActiveMode("evil");
-      }, 600);
-    } else {
-      passwordMsg.textContent = "Wrong password!";
-      passwordMsg.className = "password-msg error";
-    }
-  }
 
   function setActiveMode(modeName) {
     const modeButtons = document.querySelectorAll(".mode-btn");
@@ -322,7 +326,13 @@ Rizz AI:
 
   // Neu binden der Klick-Events nach dem Einfügen
   bindModeButtons();
+  closePopupBtn.addEventListener("click", closePasswordPrompt);
+submitBtn.addEventListener("click", checkPassword);
 
+// Optional: Enter-Taste im Passwortfeld erlaubt auch Submit
+passwordInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") checkPassword();
+});
 
   // Weitere Event-Listener (Senden, Eingabe, Clear) hier falls benötigt
   console.log("Script main.js loaded");
