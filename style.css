@@ -981,8 +981,13 @@ body.dark-mode .extra {
   background-color: rgba(168, 163, 163, 0.95);
   backdrop-filter: none; /* Optional, kann auch blur bleiben */
   color: #222;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  /* Mehrlagiger Schatten für mehr Tiefe */
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.1),
+    0 12px 24px rgba(0, 0, 0, 0.05);
 }
+
 
 
 .mode-sidebar.open {
