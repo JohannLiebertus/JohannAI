@@ -946,7 +946,6 @@ body.dark-mode .extra {
 }
 
 
-
 .mode-sidebar-header {
   display: flex;
   justify-content: center;
@@ -1245,3 +1244,32 @@ body.dark-mode .extra {
   }
 }
 
+#modeToggleBtn {
+  position: fixed;           /* Fixiert am Viewport */
+  top: 15px;                 /* Abstand von oben */
+  right: 15px;               /* Abstand von rechts */
+  width: 45px;               /* Quadratischer, kompakter Knopf */
+  height: 45px;
+  background: linear-gradient(135deg, #007bff, #0056b3); /* schöner Farbverlauf */
+  border: none;
+  border-radius: 12px;       /* abgerundete Ecken */
+  color: white;
+  font-size: 24px;           /* große Pfeil-Emoji */
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.6);
+  transition: background 0.3s ease, transform 0.2s ease;
+  display: flex;             /* für zentrierten Inhalt */
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  z-index: 1100;             /* über der Sidebar */
+}
+
+#modeToggleBtn:hover {
+  background: linear-gradient(135deg, #0056b3, #003d7a);
+  transform: scale(1.1);
+}
+
+#modeToggleBtn:active {
+  transform: scale(0.95);
+}
