@@ -796,6 +796,7 @@ body.dark-mode .extra {
     
     .mode-btn.evil.locked {
       position: relative;
+
       color: transparent;
       background: #222;
       pointer-events: none;
@@ -897,4 +898,71 @@ body.dark-mode .extra {
       color: #000;
     }
 
+/* Sidebar Toggle Button */
+.mode-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  margin-left: 10px;
+  color: #fff;
+}
+
+/* Sidebar Menü */
+.mode-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 100%;
+  background-color: #222;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  z-index: 1001;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-left: 2px solid #555;
+}
+
+.mode-sidebar.open {
+  width: 50%;
+  max-width: 300px;
+  padding: 1rem;
+}
+
+.mode-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.close-sidebar-btn {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #aaa;
+}
+
+.close-sidebar-btn:hover {
+  color: #fff;
+}
+
+.mode-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Versteckt Original-Modus-Knöpfe */
+.mode-switch {
+  display: none !important;
+}
+
+/* Eingabebereich unten */
+.input-section {
+  margin-top: auto;
+}
 
