@@ -1244,32 +1244,32 @@ body.dark-mode .extra {
   }
 }
 
-#pfeil {
-  position: fixed;           /* fest oben rechts im Browser */
-  top: 15px;
-  right: 15px;
-  width: 40px;               /* kompakt */
-  height: 40px;
-  background: linear-gradient(135deg, #007bff, #0056b3);
+#modeToggleBtn {
+position: fixed;           /* fixiert am Viewport */
+  top: 15px;                 /* Abstand von oben */
+  right: 15px;               /* Abstand von rechts */
+  width: 40px;               /* kompakte Breite */
+  height: 40px;              /* kompakte Höhe */
+  background: linear-gradient(135deg, #007bff, #0056b3); /* schöner Farbverlauf */
   border: none;
   border-radius: 50%;        /* rund */
   color: white;
-  font-size: 22px;
+  font-size: 22px;           /* Größe Pfeil */
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.6);
-  display: flex;
+  display: flex;             /* Inhalt zentrieren */
   align-items: center;
   justify-content: center;
   user-select: none;
-  z-index: 1100;
+  z-index: 1100;             /* über der Sidebar */
   transition: background 0.3s ease, transform 0.2s ease;
 }
 
-#pfeil:hover {
+#modeToggleBtn:hover {
   background: linear-gradient(135deg, #0056b3, #003d7a);
   transform: scale(1.1);
 }
 
-#pfeil:active {
+#modeToggleBtn:active {
   transform: scale(0.95);
 }
