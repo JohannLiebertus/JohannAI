@@ -298,55 +298,24 @@ Rizz AI:
 
   updateThemeIcon();
 
-  checkUnlockStatus();
-
-  // Sidebar mit Buttons füllen
-  sidebarContent.innerHTML = originalModeContainer.innerHTML;
-
-  // evilBtn erst jetzt setzen
-  evilBtn = document.querySelector(".mode-btn.evil");
-
-  bindModeButtons();
-
-  // Evil Button Listener (um Modus zu toggeln)
-  evilBtn.addEventListener("click", () => {
-    if (evilUnlocked) {
-      lockEvilMode();
-      setActiveMode("johann");
-    } else {
-      showPasswordPrompt();
-    }
-  });
-
-  // Popup Event-Listener
-  closePopupBtn.addEventListener("click", closePasswordPrompt);
-  submitBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    checkPassword();
-  });
-  passwordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      checkPassword();
-    }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      closePasswordPrompt();
-    }
-  });
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
-      closePasswordPrompt();
-    }
-  });
-
   // Sidebar öffnen/schließen
   modeToggleBtn.addEventListener("click", () => {
     sidebar.classList.add("open");
   });
+
   closeSidebarBtn.addEventListener("click", () => {
     sidebar.classList.remove("open");
   });
 
+  // Sidebar mit Buttons füllen
+  sidebarContent.innerHTML = originalModeContainer.innerHTML;
+
+  // Initialisierung für Evil-Button
+  evilBtn = document.querySelector(".mode-btn.evil");
+
+  bindModeButtons();
+
+  // Weitere Event-Listener (Senden, Eingabe, Clear) hier falls benötigt
+  checkUnlockStatus();
   console.log("Script main.js loaded");
 });
