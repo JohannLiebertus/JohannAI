@@ -19,10 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebarContent = sidebar.querySelector(".mode-sidebar-content");
   const originalModeContainer = document.querySelector(".mode-switch");
 
-  let currentMode = "johann"; // Standard-Modus
+  let currentMode = "johann";
   let chatHistory = [];
   const modeUnlocked = { evil: false };
-  let evilBtn; // erst nach bindModeButtons setzen
+  let evilBtn;
 
   const modeAvatars = {
     johann: "johann.png",
@@ -83,6 +83,7 @@ Rizz AI:
       });
     });
 
+    // Evil Button nach dem Binden der Buttons neu setzen
     evilBtn = document.querySelector(".mode-btn.evil");
   }
 
@@ -237,17 +238,6 @@ Rizz AI:
 
   updateThemeIcon();
 
-  function setActiveMode(modeName) {
-    const modeButtons = document.querySelectorAll(".mode-btn");
-    modeButtons.forEach((btn) => {
-      if (btn.dataset.mode === modeName) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
-    });
-  }
-
   function checkUnlockStatus() {
     if (sessionStorage.getItem("evilModeUnlocked") === "true") {
       evilUnlocked = true;
@@ -316,30 +306,11 @@ Rizz AI:
   // Sidebar füllen und Buttons binden
   sidebarContent.innerHTML = originalModeContainer.innerHTML;
   bindModeButtons();
+  
+  // Evil Button Eventlistener direkt in bindModeButtons hinzugefügt, 
+  // daher hier nicht nochmal nötig!
 
-  // Evil Button nach bindModeButtons setzen und Listener anfügen
-  evilBtn = document.querySelector(".mode-btn.evil");
-  evilBtn.addEventListener("click", () => {
-    if (evilBtn.classList.contains("locked")) {
-      showPasswordPrompt();
-    } else {
-      if (evilBtn.classList.contains("active")) {
-        evilBtn.classList.remove("active");
-        evilUnlocked = false;
-        sessionStorage.removeItem("evilModeUnlocked");
-        lockEvilMode();
-        setActiveMode("johann");
-        alert("Evil Mode deaktiviert!");
-      } else {
-        evilBtn.classList.add("active");
-        evilUnlocked = true;
-        setActiveMode("evil");
-        alert("Evil Mode aktiviert!");
-      }
-    }
-  });
-
-  // Sidebar öffnen/schließen Buttons
+  // Sidebar öffnen/schließen
   modeToggleBtn.addEventListener("click", () => {
     sidebar.classList.add("open");
   });
