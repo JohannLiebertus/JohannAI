@@ -303,16 +303,19 @@ Rizz AI:
   updateThemeIcon();
 
   // Sidebar öffnen/schließen
-  modeToggleBtn.addEventListener("click", () => {
-    sidebar.classList.remove("hidden");  // Sichtbar machen
-    sidebar.classList.add("open");       // Breite einfahren
-  });
 
+modeToggleBtn.addEventListener("click", () => {
+  sidebar.classList.remove("hidden");
+  sidebar.classList.add("open");
+  modeToggleBtn.classList.add("hidden-button"); // Pfeil ausblenden
+});
 
-  closeSidebarBtn.addEventListener("click", () => {
-    sidebar.classList.remove("open");
-    sidebar.classList.add("hidden"); // Wieder verstecken
-  });
+closeSidebarBtn.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+  sidebar.classList.add("hidden");
+  modeToggleBtn.classList.remove("hidden-button"); // Pfeil wieder anzeigen
+});
+
 
 
 
