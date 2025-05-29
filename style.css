@@ -979,18 +979,19 @@ body.dark-mode .extra {
 }
 
 .mode-title {
-  font-size: 2.5rem;
-  font-weight: 900;
-  background: linear-gradient(270deg, #ff6a00, #ee0979, #ff6a00);
-  background-size: 600% 600%;
-  animation: gradientAnimation 8s ease infinite;
+  font-size: 2.5rem !important;
+  font-weight: 900 !important;
+  background: linear-gradient(270deg, #ff6a00, #ee0979, #ff6a00) !important;
+  background-size: 600% 600% !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: gradientAnimation 8s ease infinite !important;
   text-shadow:
     0 0 5px rgba(255, 106, 0, 0.7),
-    0 0 15px rgba(238, 9, 121, 0.6);
-  letter-spacing: 3px;
-  user-select: none;
-  cursor: default;
-  transition: transform 0.3s ease;
+    0 0 15px rgba(238, 9, 121, 0.6) !important;
+  letter-spacing: 3px !important;
+  user-select: none !important;
+  cursor: default !important;
+  transition: transform 0.3s ease !important;
 }
 
 .mode-title:hover {
