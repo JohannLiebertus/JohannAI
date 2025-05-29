@@ -9,7 +9,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeCheckbox = document.getElementById("theme-checkbox");
   const themeIcon = document.getElementById("theme-icon");
   const overlay = document.getElementById("overlay");
-  const evilBtn = document.querySelector(".mode-btn.evil");
+  let evilBtn;  // Variable deklarieren ohne Wert
+
+function bindModeButtons() {
+  const allButtons = document.querySelectorAll(".mode-btn");
+  allButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
+
+      if (mode === 'evil' && evilBtn.classList.contains('locked')) {
+        showPasswordPrompt();
+        return;
+      }
+
+      currentMode = mode;
+      allButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      chatDisplay.innerHTML = "";
+      const prompt = modePrompts[currentMode];
+      chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
+    });
+  });
+
+  // Nach dem Binden der Buttons auch evilBtn aktualisieren:
+  evilBtn = document.querySelector(".mode-btn.evil");
+}
+
   const passwordInput = document.getElementById("evilPassword");
   const passwordMsg = document.getElementById("passwordMsg");
   const closePopupBtn = document.getElementById("closePopup");
