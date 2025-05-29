@@ -253,6 +253,17 @@ Rizz AI:
     imageInput.value = "";
   }
 
+
+  themeCheckbox.addEventListener("change", () => {
+  if (themeCheckbox.checked) {
+    // Dark Mode an
+    sidebar.classList.remove("light-mode");
+  } else {
+    // Light Mode an
+    sidebar.classList.add("light-mode");
+  }
+});
+
   async function handleResponse(res) {
     if (!res.ok) {
       console.error("Serverantwort nicht OK:", res.status);
