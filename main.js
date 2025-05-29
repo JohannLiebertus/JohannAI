@@ -134,19 +134,20 @@ Rizz AI:
     chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
   }
 
-  function bindModeButtons() {
-    const allButtons = document.querySelectorAll(".mode-btn");
-    allButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const mode = btn.dataset.mode;
-        if (mode === "evil" && evilBtn.classList.contains("locked")) {
-          showPasswordPrompt();
-          return;
-        }
-        setActiveMode(mode);
-      });
+ function bindModeButtons() {
+  console.log("Modus-Buttons wurden gebunden");
+  const allButtons = document.querySelectorAll(".mode-btn");
+  allButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
+      if (mode === "evil" && evilBtn.classList.contains("locked")) {
+        showPasswordPrompt();
+        return;
+      }
+      setActiveMode(mode);
     });
-  }
+  });
+}
 
   function addMessage(role, text, isImage = false) {
     const msgWrapper = document.createElement("div");
@@ -313,12 +314,15 @@ Rizz AI:
 
 
   // Sidebar mit Buttons füllen
+// Sidebar mit Buttons füllen
   sidebarContent.innerHTML = originalModeContainer.innerHTML;
 
-  // Initialisierung für Evil-Button
-  evilBtn = document.querySelector(".mode-btn.evil");
+  // Buttons NEU referenzieren, weil DOM sich geändert hat!
+  evilBtn = sidebarContent.querySelector(".mode-btn.evil");
 
+  // Neu binden der Klick-Events nach dem Einfügen
   bindModeButtons();
+
 
   // Weitere Event-Listener (Senden, Eingabe, Clear) hier falls benötigt
   console.log("Script main.js loaded");
