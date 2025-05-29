@@ -979,10 +979,34 @@ body.dark-mode .extra {
 }
 
 .mode-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: rgb(238, 0, 0);
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(270deg, #ff6a00, #ee0979, #ff6a00);
+  background-size: 600% 600%;
+  animation: gradientAnimation 8s ease infinite;
+  text-shadow:
+    0 0 5px rgba(255, 106, 0, 0.7),
+    0 0 15px rgba(238, 9, 121, 0.6);
+  letter-spacing: 3px;
+  user-select: none;
+  cursor: default;
+  transition: transform 0.3s ease;
 }
+
+.mode-title:hover {
+  transform: scale(1.1) rotate(-4deg);
+  text-shadow:
+    0 0 10px rgba(255, 106, 0, 1),
+    0 0 20px rgba(238, 9, 121, 1),
+    0 0 30px rgba(255, 106, 0, 0.8);
+}
+
+@keyframes gradientAnimation {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
 
 .close-sidebar-btn {
   position: absolute;
