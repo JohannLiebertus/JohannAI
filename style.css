@@ -978,14 +978,35 @@ body.dark-mode .extra {
 }
 
 .mode-sidebar.light-mode {
+  width: 300px; /* Feste Breite wie vorher */
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  
   background-color: rgba(168, 163, 163, 0.95);
   backdrop-filter: none; /* Optional, kann auch blur bleiben */
   color: #222;
-  /* Mehrlagiger Schatten für mehr Tiefe */
+  
+  /* Mehrlagiger Schatten für mehr Tiefe, ohne Größe zu ändern */
   box-shadow:
     0 4px 8px rgba(0, 0, 0, 0.15),
     0 8px 16px rgba(0, 0, 0, 0.1),
     0 12px 24px rgba(0, 0, 0, 0.05);
+  
+  /* Animation für das Herausfahren, bleibt bei fester Breite */
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  pointer-events: none;
+  z-index: 1001;
+  display: block;
+}
+
+.mode-sidebar.light-mode.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 
