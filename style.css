@@ -925,7 +925,7 @@ body.dark-mode .extra {
 .mode-sidebar {
   background-color: rgba(34, 34, 34, 0.95);
   backdrop-filter: blur(10px);
-  color: white;
+  color: rgb(158, 158, 158);
   position: fixed;
   top: 0;
   right: 0;
@@ -943,7 +943,7 @@ body.dark-mode .extra {
 }
 
 .mode-sidebar.light-mode {
-  background-color: rgba(172, 172, 172, 0.95);
+  background-color: rgba(105, 105, 105, 0.95);
   backdrop-filter: none; /* Optional, kann auch blur bleiben */
   color: #222;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
