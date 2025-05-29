@@ -19,10 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebarContent = sidebar.querySelector(".mode-sidebar-content");
   const originalModeContainer = document.querySelector(".mode-switch");
 
-  let currentMode = "johann";  // Standard-Modus ist Johann
+  let currentMode = "johann"; // Standard-Modus
   let chatHistory = [];
   const modeUnlocked = { evil: false };
-  let evilBtn;  // wird erst nach bindModeButtons gesetzt
+  let evilBtn; // erst nach bindModeButtons setzen
 
   const modeAvatars = {
     johann: "johann.png",
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     coding: "code.png",
     mental: "doc.png",
     human: "human.png",
-    evil: "evil.png"
+    evil: "evil.png",
   };
 
   const modePrompts = {
@@ -64,17 +64,17 @@ Rizz AI:
 
   function bindModeButtons() {
     const allButtons = document.querySelectorAll(".mode-btn");
-    allButtons.forEach(btn => {
+    allButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         const mode = btn.dataset.mode;
 
-        if (mode === 'evil' && evilBtn.classList.contains('locked')) {
+        if (mode === "evil" && evilBtn.classList.contains("locked")) {
           showPasswordPrompt();
           return;
         }
 
         currentMode = mode;
-        allButtons.forEach(b => b.classList.remove("active"));
+        allButtons.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
 
         chatDisplay.innerHTML = "";
@@ -125,7 +125,7 @@ Rizz AI:
   }
 
   sendBtn.addEventListener("click", sendMessage);
-  userInput.addEventListener("keypress", e => {
+  userInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") sendMessage();
   });
 
@@ -155,9 +155,10 @@ Rizz AI:
     const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
     const userMsg = { role: "user", content: text };
 
-    const historyToSend = currentMode === "evil"
-      ? [systemPrompt, userMsg]
-      : [systemPrompt, ...chatHistory.filter(msg => msg.role !== "system"), userMsg];
+    const historyToSend =
+      currentMode === "evil"
+        ? [systemPrompt, userMsg]
+        : [systemPrompt, ...chatHistory.filter((msg) => msg.role !== "system"), userMsg];
 
     if (imageFile) {
       const formData = new FormData();
@@ -168,7 +169,7 @@ Rizz AI:
 
       fetch(`${API_URL}/chat-image`, { method: "POST", body: formData })
         .then(handleResponse)
-        .catch(err => addMessage("error", "Fehler: " + err.message));
+        .catch((err) => addMessage("error", "Fehler: " + err.message));
     } else {
       fetch(`${API_URL}/chat`, {
         method: "POST",
@@ -176,11 +177,11 @@ Rizz AI:
         body: JSON.stringify({
           history: historyToSend,
           mode: currentMode,
-          message: text
-        })
+          message: text,
+        }),
       })
         .then(handleResponse)
-        .catch(err => addMessage("error", "Fehler: " + err.message));
+        .catch((err) => addMessage("error", "Fehler: " + err.message));
     }
 
     userInput.value = "";
@@ -236,11 +237,9 @@ Rizz AI:
 
   updateThemeIcon();
 
-  let evilUnlocked = false;
-  const SESSION_KEY = "evilModeUnlocked";
-
   function setActiveMode(modeName) {
-    modeButtons.forEach(btn => {
+    const modeButtons = document.querySelectorAll(".mode-btn");
+    modeButtons.forEach((btn) => {
       if (btn.dataset.mode === modeName) {
         btn.classList.add("active");
       } else {
@@ -250,7 +249,7 @@ Rizz AI:
   }
 
   function checkUnlockStatus() {
-    if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    if (sessionStorage.getItem("evilModeUnlocked") === "true") {
       evilUnlocked = true;
       unlockEvilMode();
     } else {
@@ -289,7 +288,7 @@ Rizz AI:
     if (!evilUnlocked) {
       evilBtn.classList.remove("active");
       lockEvilMode();
-      setActiveMode('johann');
+      setActiveMode("johann");
     }
   }
 
@@ -298,13 +297,13 @@ Rizz AI:
     if (entered === "vape") {
       passwordMsg.textContent = "Successful!";
       passwordMsg.className = "password-msg success";
-      sessionStorage.setItem(SESSION_KEY, "true");
+      sessionStorage.setItem("evilModeUnlocked", "true");
 
       setTimeout(() => {
         closePasswordPrompt();
         unlockEvilMode();
         evilBtn.classList.add("active");
-        setActiveMode('evil');
+        setActiveMode("evil");
         modeUnlocked.evil = true;
         alert("Evil Mode aktiviert!");
       }, 800);
@@ -314,10 +313,12 @@ Rizz AI:
     }
   }
 
-  // Binde alle Buttons inklusive Evil Button
+  // Sidebar füllen und Buttons binden
+  sidebarContent.innerHTML = originalModeContainer.innerHTML;
   bindModeButtons();
 
-  // Evil Button Eventlistener separat binden, da evilBtn erst nach bindModeButtons gesetzt wird
+  // Evil Button nach bindModeButtons setzen und Listener anfügen
+  evilBtn = document.querySelector(".mode-btn.evil");
   evilBtn.addEventListener("click", () => {
     if (evilBtn.classList.contains("locked")) {
       showPasswordPrompt();
@@ -325,22 +326,20 @@ Rizz AI:
       if (evilBtn.classList.contains("active")) {
         evilBtn.classList.remove("active");
         evilUnlocked = false;
-        sessionStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem("evilModeUnlocked");
         lockEvilMode();
-        setActiveMode('johann');
+        setActiveMode("johann");
         alert("Evil Mode deaktiviert!");
       } else {
         evilBtn.classList.add("active");
         evilUnlocked = true;
-        setActiveMode('evil');
+        setActiveMode("evil");
         alert("Evil Mode aktiviert!");
       }
     }
   });
 
-  // Sidebar initialisieren
-  sidebarContent.innerHTML = originalModeContainer.innerHTML;
-
+  // Sidebar öffnen/schließen Buttons
   modeToggleBtn.addEventListener("click", () => {
     sidebar.classList.add("open");
   });
