@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Johann M – by Lächelmann</title>
-  <link rel="stylesheet" href="style.css" />  <!-- Verlinkung der externen CSS Datei -->
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <div class="container">
 
@@ -15,7 +14,7 @@
     <div class="title-bar">
       <div style="display:flex;align-items:center;gap:10px;">
         <h1 id="title">Johann AI by Smyle</h1>
-        <span class="version-text">Version: Alpha 3.1</span>
+        <span class="version-text">Version: Alpha 3.0</span>
       </div>
       <div style="display:flex;align-items:center;">
         <span id="theme-icon">🌙</span>
@@ -26,20 +25,25 @@
       </div>
     </div>
 
-    <!-- Toggle Button für Sidebar -->
-<button id="modeToggleBtn" class="mode-toggle-btn" title="Modusmenü öffnen">➡️</button>
+    <button id="pfeil" class="mode-toggle-btn" title="Modusmenü öffnen">➡️</button>
 
-<!-- Sidebar Menü -->
-<div id="modeSidebar" class="mode-sidebar hidden">
-  <div class="mode-sidebar-header">
-    <span class="mode-title">Mode</span>
-    <span id="closeSidebar" class="close-sidebar-btn">×</span>
-  </div>
-  <div class="mode-sidebar-content">
-    <!-- Hierhin werden die Mode-Knöpfe automatisch verschoben -->
-  </div>
-</div>
-
+    <div id="modeSidebar" class="mode-sidebar hidden">
+      <div class="mode-sidebar-header">
+        <span class="mode-title">Mode</span>
+        <span id="closeSidebar" class="close-sidebar-btn">×</span>
+      </div>
+      <div class="mode-sidebar-content">
+        <div class="mode-switch">
+          <button class="mode-btn active" data-mode="johann">☝ Johann</button>
+          <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
+          <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
+          <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
+          <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
+          <button class="mode-btn" data-mode="human">Human AI 👤</button>
+          <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
+        </div>
+      </div>
+    </div>
 
     <div class="chat-display" id="chat-display"></div>
 
@@ -50,37 +54,22 @@
       <button id="send-btn" class="send-btn">Senden</button>
     </div>
 
-<div class="mode-switch">
-  <button class="mode-btn active" data-mode="johann">☝ Johann</button>
-  <button class="mode-btn" data-mode="rizz">😎 Rizz AI</button>
-  <button class="mode-btn" data-mode="classic">🤖 GPT Classic</button>
-  <button class="mode-btn" data-mode="mental">Mental Health 🚬</button>
-  <button class="mode-btn" data-mode="coding">Coding 👨‍💻</button>
-  <button class="mode-btn" data-mode="human">Human AI 👤</button>
-  
-  
-  <button id="evilBtn" class="mode-btn evil locked" data-mode="evil">🚨Evil Mode🚨</button>
-</div>
-
-
     <div class="extra-buttons">
       <button class="extra" id="clear-btn">Clear</button>
     </div>
 
-    <!-- Overlay für die Passwortabfrage -->
-    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
+    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" tabindex="-1">
       <div class="popup">
         <span class="close-btn" id="closePopup" title="Schließen">×</span>
         <p id="popupTitle">Enter password to unlock Evil Mode:</p>
         <input type="password" id="evilPassword" placeholder="Enter password..." autocomplete="off" />
         <div id="passwordMsg" class="password-msg"></div>
         <button type="button" class="submit-btn" id="submitPassword">Submit</button>
-
       </div>
     </div>
 
   </div>
 
-  <script src="main.js"></script>  <!-- Verlinkung der externen JS Datei -->
+  <script src="main.js"></script>
 </body>
 </html>
