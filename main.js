@@ -9,6 +9,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeCheckbox = document.getElementById("theme-checkbox");
   const themeIcon = document.getElementById("theme-icon");
   const overlay = document.getElementById("overlay");
+  let evilBtn;  // Variable deklarieren ohne Wert
+
+function bindModeButtons() {
+  const allButtons = document.querySelectorAll(".mode-btn");
+  allButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
+
+      if (mode === 'evil' && evilBtn.classList.contains('locked')) {
+        showPasswordPrompt();
+        return;
+      }
+
+      currentMode = mode;
+      allButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      chatDisplay.innerHTML = "";
+      const prompt = modePrompts[currentMode];
+      chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
+    });
+  });
+
+  // Nach dem Binden der Buttons auch evilBtn aktualisieren:
+  evilBtn = document.querySelector(".mode-btn.evil");
+}
+
   const passwordInput = document.getElementById("evilPassword");
   const passwordMsg = document.getElementById("passwordMsg");
   const closePopupBtn = document.getElementById("closePopup");
@@ -22,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentMode = "johann";  // Standard-Modus ist Johann
   let chatHistory = [];
   const modeUnlocked = { evil: false };
-  let evilBtn;  // wird erst nach bindModeButtons gesetzt
 
   const modeAvatars = {
     johann: "johann.png",
@@ -82,9 +108,6 @@ Rizz AI:
         chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
       });
     });
-
-    // evilBtn neu referenzieren, da Buttons gerade frisch ins Sidebar kopiert wurden
-    evilBtn = document.querySelector(".mode-btn.evil");
   }
 
   function addMessage(role, text, isImage = false) {
@@ -315,10 +338,6 @@ Rizz AI:
     }
   }
 
-  // Binde die Modus Buttons und setze evilBtn danach neu
-  bindModeButtons();
-
-  // Evil Mode Button Listener erst hier anhängen
   evilBtn.addEventListener("click", () => {
     if (evilBtn.classList.contains("locked")) {
       showPasswordPrompt();
@@ -339,8 +358,31 @@ Rizz AI:
     }
   });
 
-  // Sidebar-Inhalt und Events setzen
+  sendBtn.addEventListener("click", () => {
+    if (!evilUnlocked && evilBtn.classList.contains("active")) {
+      evilBtn.classList.remove("active");
+      lockEvilMode();
+      setActiveMode('johann');
+    }
+  });
+
+  submitBtn.addEventListener("click", checkPassword);
+  closePopupBtn.addEventListener("click", closePasswordPrompt);
+
+  passwordInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") checkPassword();
+    if (e.key === "Escape") closePasswordPrompt();
+  });
+
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
+      closePasswordPrompt();
+    }
+  });
+
+  // Sidebar initialisieren
   sidebarContent.innerHTML = originalModeContainer.innerHTML;
+  bindModeButtons();
 
   modeToggleBtn.addEventListener("click", () => {
     sidebar.classList.add("open");
