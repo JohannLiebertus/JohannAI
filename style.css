@@ -966,3 +966,21 @@ body.dark-mode .extra {
   margin-top: auto;
 }
 
+/* === Bestehende CSS-Regeln bleiben erhalten === */
+
+/* Evil Mode Button im gesperrten Zustand: sichtbar, klickbar, aber mit Sperr-Hinweis */
+.mode-btn.evil.locked {
+  color: rgba(255, 255, 255, 0.7) !important; /* leicht transparent, aber sichtbar */
+  background: #222 !important;                 /* dunkler Hintergrund */
+  pointer-events: auto !important;             /* Klicks möglich machen */
+  cursor: not-allowed !important;              /* Sperr-Cursor anzeigen */
+  filter: none !important;                      /* keine Unschärfe */
+  box-shadow: 0 0 6px #FF4444 !important;      /* leichter roter Leuchteffekt */
+  border: 2px solid #990000 !important;        /* roter Rand */
+  transition: filter 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.mode-btn.evil.locked:hover {
+  filter: brightness(1.1) !important;
+  box-shadow: 0 0 10px #FF6666 !important;
+}
