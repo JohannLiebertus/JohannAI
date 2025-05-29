@@ -1,5 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
-  
+  // Wichtig: Erst Variablen definieren, die du brauchst
+  const themeCheckbox = document.getElementById("theme-checkbox");
+  const sidebar = document.getElementById("modeSidebar");
+
+  // Initiale Klasse für Sidebar setzen (einmal, ganz am Anfang)
+  if (themeCheckbox.checked) {
+    sidebar.classList.remove("light-mode"); // Wenn Dark Mode aktiv ist
+  } else {
+    sidebar.classList.add("light-mode");    // Wenn Light Mode aktiv ist
+  }
+
+  // Dann Eventlistener hinzufügen, damit Sidebar sich ändert, wenn du Theme wechselst
+  themeCheckbox.addEventListener("change", () => {
+    if (themeCheckbox.checked) {
+      sidebar.classList.remove("light-mode"); // Dark Mode an
+    } else {
+      sidebar.classList.add("light-mode");    // Light Mode an
+    }
+  });
+
   const API_URL = "https://johannai.onrender.com";
 
   const sendBtn = document.getElementById("send-btn");
@@ -7,12 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageInput = document.getElementById("image-input");
   const chatDisplay = document.getElementById("chat-display");
   const clearBtn = document.getElementById("clear-btn");
-  const themeCheckbox = document.getElementById("theme-checkbox");
   const themeIcon = document.getElementById("theme-icon");
   const overlay = document.getElementById("overlay");
   const passwordInput = document.getElementById("evilPassword");
   const passwordMsg = document.getElementById("passwordMsg");
-  const sidebar = document.getElementById("modeSidebar");
   const modeToggleBtn = document.getElementById("modeToggleBtn");
   const closeSidebarBtn = document.getElementById("closeSidebar");
   const sidebarContent = sidebar.querySelector(".mode-sidebar-content");
@@ -33,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     human: "human.png",
     evil: "evil.png",
   };
+
 
   const modePrompts = {
     johann: `Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
@@ -254,16 +272,7 @@ Rizz AI:
   }
 
 
-  themeCheckbox.addEventListener("change", () => {
-  if (themeCheckbox.checked) {
-    // Dark Mode an
-    sidebar.classList.remove("light-mode");
-  } else {
-    // Light Mode an
-    sidebar.classList.add("light-mode");
-  }
-});
-
+  
   async function handleResponse(res) {
     if (!res.ok) {
       console.error("Serverantwort nicht OK:", res.status);
@@ -306,10 +315,6 @@ Rizz AI:
     themeIcon.textContent = themeCheckbox.checked ? "🌞" : "🌙";
   }
 
-  themeCheckbox.addEventListener("change", () => {
-    document.body.classList.toggle("dark-mode", themeCheckbox.checked);
-    updateThemeIcon();
-  });
 
   updateThemeIcon();
 
@@ -346,7 +351,6 @@ document.getElementById("closePopup").addEventListener("click", closePasswordPro
 document.getElementById("evilPassword").addEventListener("keypress", (e) => {
   if (e.key === "Enter") checkPassword();
 });
-
 
   console.log("Script main.js loaded");
 });
