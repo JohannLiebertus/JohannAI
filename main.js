@@ -373,3 +373,24 @@ window.addEventListener("keydown", e => {
 });
 
 checkUnlockStatus();
+
+// Sidebar-Toggle-Logik
+const sidebar = document.getElementById("modeSidebar");
+const modeToggleBtn = document.getElementById("modeToggleBtn");
+const closeSidebarBtn = document.getElementById("closeSidebar");
+const sidebarContent = sidebar.querySelector(".mode-sidebar-content");
+const originalModeContainer = document.querySelector(".mode-switch");
+
+// Knöpfe umziehen
+sidebarContent.innerHTML = originalModeContainer.innerHTML;
+
+// Öffnen
+modeToggleBtn.addEventListener("click", () => {
+  sidebar.classList.add("open");
+});
+
+// Schließen
+closeSidebarBtn.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+});
+
