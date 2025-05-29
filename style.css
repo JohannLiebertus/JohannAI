@@ -943,7 +943,7 @@ body.dark-mode .extra {
 }
 
 .mode-sidebar.light-mode {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(172, 172, 172, 0.651);
   backdrop-filter: none; /* Optional, kann auch blur bleiben */
   color: #222;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
@@ -979,9 +979,40 @@ body.dark-mode .extra {
 }
 
 .mode-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
+  font-size: 2rem; /* Etwas größer für mehr Impact */
+  font-weight: 900; /* Sehr fett */
+  background: linear-gradient(45deg, #00c6ff, #0072ff, #00ffc6, #00c6ff);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent; /* Nur Webkit-Browser */
+
+  animation: gradientMove 8s ease infinite;
+  text-shadow: 0 0 10px rgba(0, 198, 255, 0.7), 0 0 20px rgba(0, 114, 255, 0.5);
+  letter-spacing: 2px;
+  transition: transform 0.3s ease, text-shadow 0.3s ease;
+  cursor: default;
+  user-select: none;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.mode-title:hover {
+  transform: scale(1.1) rotate(-3deg);
+  text-shadow:
+    0 0 15px rgba(0, 255, 198, 0.9),
+    0 0 30px rgba(0, 255, 198, 0.7),
+    0 0 40px rgba(0, 198, 255, 1);
 }
 
 .close-sidebar-btn {
