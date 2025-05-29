@@ -65,25 +65,33 @@ Rizz AI:
 
 console.log("Script main.js loaded");
 
-modeButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentMode = btn.dataset.mode; // Setze den aktuellen Modus entsprechend des Buttons
-    modeButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
+function bindModeButtons() {
+  const allButtons = document.querySelectorAll(".mode-btn");
+  allButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
 
-    // Leere den Chat beim Moduswechsel
-    chatDisplay.innerHTML = "";  // Lösche den Chat-Bereich
-    chatHistory = [];  // Leere den Chat-Verlauf
+      if (mode === 'evil' && evilBtn.classList.contains('locked')) {
+        showPasswordPrompt();
+        return;
+      }
 
-    // Hole den entsprechenden Prompt für den aktuellen Modus
-    const prompt = modePrompts[currentMode];
+      currentMode = mode;
+      allButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
 
-    if (prompt) {
-      // Setze den Chat-Verlauf auf den entsprechenden Prompt
-      chatHistory = [{ role: "system", content: prompt }];
-    }
+      chatDisplay.innerHTML = "";
+      const prompt = modePrompts[currentMode];
+      chatHistory = prompt ? [{ role: "system", content: prompt }] : [];
+    });
   });
-});
+}
+
+// Beim Initialisieren aufrufen
+bindModeButtons();
+sidebarContent.innerHTML = originalModeContainer.innerHTML;
+bindModeButtons();  // 🟢 Wichtig: Neu binden nach dem Kopieren!
+
 
 function addMessage(role, text, isImage = false) {
   const msgWrapper = document.createElement("div");
@@ -339,16 +347,6 @@ evilBtn.addEventListener("click", () => {
   }
 });
 
-modeButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const mode = btn.dataset.mode;
-    if (mode === 'evil' && evilBtn.classList.contains('locked')) {
-      showPasswordPrompt();
-      return;
-    }
-    setActiveMode(mode);
-  });
-});
 
 sendBtn.addEventListener('click', () => {
   if (!evilUnlocked && evilBtn.classList.contains('active')) {
