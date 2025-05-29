@@ -301,12 +301,16 @@ Rizz AI:
 
   // Sidebar öffnen/schließen
   modeToggleBtn.addEventListener("click", () => {
-    sidebar.classList.add("open");
+    sidebar.classList.remove("hidden");  // Sichtbar machen
+    sidebar.classList.add("open");       // Breite einfahren
   });
+
 
   closeSidebarBtn.addEventListener("click", () => {
     sidebar.classList.remove("open");
+    sidebar.classList.add("hidden"); // Wieder verstecken
   });
+
 
   // Sidebar mit Buttons füllen
   sidebarContent.innerHTML = originalModeContainer.innerHTML;
