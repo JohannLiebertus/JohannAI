@@ -3,21 +3,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeCheckbox = document.getElementById("theme-checkbox");
   const sidebar = document.getElementById("modeSidebar");
 
-  // Initiale Klasse für Sidebar setzen (einmal, ganz am Anfang)
-  if (themeCheckbox.checked) {
-    sidebar.classList.remove("light-mode"); // Wenn Dark Mode aktiv ist
-  } else {
-    sidebar.classList.add("light-mode");    // Wenn Light Mode aktiv ist
-  }
 
   // Dann Eventlistener hinzufügen, damit Sidebar sich ändert, wenn du Theme wechselst
-  themeCheckbox.addEventListener("change", () => {
-    if (themeCheckbox.checked) {
-      sidebar.classList.remove("light-mode"); // Dark Mode an
-    } else {
-      sidebar.classList.add("light-mode");    // Light Mode an
-    }
-  });
+themeCheckbox.addEventListener("change", () => {
+  if (themeCheckbox.checked) {
+    document.body.classList.add("dark-mode"); // Dark Mode AN
+    sidebar.classList.remove("light-mode");
+  } else {
+    document.body.classList.remove("dark-mode"); // Dark Mode AUS = Light Mode
+    sidebar.classList.add("light-mode");
+  }
+});
+
+if (themeCheckbox.checked) {
+  sidebar.classList.remove("light-mode");
+  document.body.classList.add("dark-mode");
+} else {
+  sidebar.classList.add("light-mode");
+  document.body.classList.remove("dark-mode");
+}
+
 
   const API_URL = "https://johannai.onrender.com";
 
