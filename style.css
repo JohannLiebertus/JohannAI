@@ -923,9 +923,6 @@ body.dark-mode .extra {
 /* Sidebar Menü */
 /* Sidebar Menü */
 .mode-sidebar {
-  background-color: rgba(34, 34, 34, 0.95);
-  backdrop-filter: blur(10px);
-  color: rgb(158, 158, 158);
   position: fixed;
   top: 0;
   right: 0;
@@ -940,10 +937,48 @@ body.dark-mode .extra {
   z-index: 1001;
   display: block;
   pointer-events: none;
+
+  /* Hier der Regenbogen-Rand */
+  border-left: 6px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    red, orange, yellow, green, blue, indigo, violet
+  );
+  animation: rainbowSlide 6s linear infinite;
+  border-radius: 3px 0 0 3px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes rainbowSlide {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 400%;
+  }
+}
+
+/* Wenn Sidebar geöffnet ist */
+.mode-sidebar.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .mode-sidebar.light-mode {
-  background-color: rgba(105, 105, 105, 0.95);
+  background-color: rgba(168, 163, 163, 0.95);
   backdrop-filter: none; /* Optional, kann auch blur bleiben */
   color: #222;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
@@ -979,28 +1014,60 @@ body.dark-mode .extra {
 }
 
 .mode-title {
-  font-size: 2.5rem !important;
-  font-weight: 900 !important;
-  background: linear-gradient(270deg, #ff6a00, #ee0979, #ff6a00) !important;
-  background-size: 600% 600% !important;
-  -webkit-text-fill-color: transparent !important;
-  animation: gradientAnimation 8s ease infinite !important;
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #ff0000; /* knalliges Rot */
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  user-select: none;
+  cursor: default;
+  -webkit-text-stroke: 1px #990000; /* dünner roter Umriss für Tiefenwirkung */
+  
+  /* Glow-Effekt */
   text-shadow:
-    0 0 5px rgba(255, 106, 0, 0.7),
-    0 0 15px rgba(238, 9, 121, 0.6) !important;
-  letter-spacing: 3px !important;
-  user-select: none !important;
-  cursor: default !important;
-  transition: transform 0.3s ease !important;
+    0 0 8px #ff0000,
+    0 0 15px #ff1a1a,
+    0 0 20px #ff3333,
+    0 0 40px #ff4d4d;
+
+  /* Pulsierende Animation */
+  animation: pulseGlow 3s ease-in-out infinite;
 }
 
-.mode-title:hover {
-  transform: scale(1.1) rotate(-4deg);
-  text-shadow:
-    0 0 10px rgba(255, 106, 0, 1),
-    0 0 20px rgba(238, 9, 121, 1),
-    0 0 30px rgba(255, 106, 0, 0.8);
+/* Pulsierende Glow-Animation */
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow:
+      0 0 8px #ff0000,
+      0 0 15px #ff1a1a,
+      0 0 20px #ff3333,
+      0 0 40px #ff4d4d;
+    color: #ff0000;
+  }
+  50% {
+    text-shadow:
+      0 0 12px #ff4d4d,
+      0 0 20px #ff6666,
+      0 0 30px #ff8080,
+      0 0 50px #ff9999;
+    color: #ff4d4d;
+  }
 }
+
+/* Leichte Bewegungs-Animation beim Hover */
+.mode-title:hover {
+  animation-play-state: paused;
+  transform: scale(1.1) rotate(-2deg);
+  text-shadow:
+    0 0 20px #ff0000,
+    0 0 30px #ff1a1a,
+    0 0 50px #ff3333,
+    0 0 80px #ff4d4d;
+  transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+
 
 @keyframes gradientAnimation {
   0% {background-position: 0% 50%;}
