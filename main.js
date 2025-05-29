@@ -12,8 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("overlay");
   const passwordInput = document.getElementById("evilPassword");
   const passwordMsg = document.getElementById("passwordMsg");
-  const closePopupBtn = document.getElementById("closePopup");
-  const submitBtn = document.getElementById("submitPassword");
   const sidebar = document.getElementById("modeSidebar");
   const modeToggleBtn = document.getElementById("modeToggleBtn");
   const closeSidebarBtn = document.getElementById("closeSidebar");
@@ -317,23 +315,24 @@ Rizz AI:
   });
 
 
-  // Sidebar mit Buttons füllen
+
+
 // Sidebar mit Buttons füllen
-  sidebarContent.innerHTML = originalModeContainer.innerHTML;
+sidebarContent.innerHTML = originalModeContainer.innerHTML;
 
-  // Buttons NEU referenzieren, weil DOM sich geändert hat!
-  evilBtn = sidebarContent.querySelector(".mode-btn.evil");
+// Evil-Button neu referenzieren
+evilBtn = sidebarContent.querySelector(".mode-btn.evil");
 
-  // Neu binden der Klick-Events nach dem Einfügen
-  bindModeButtons();
-  closePopupBtn.addEventListener("click", closePasswordPrompt);
-submitBtn.addEventListener("click", checkPassword);
+// Buttons neu aktivieren
+bindModeButtons();
 
-// Optional: Enter-Taste im Passwortfeld erlaubt auch Submit
-passwordInput.addEventListener("keypress", (e) => {
+// Passwort-Popup Buttons binden
+document.getElementById("submitPassword").addEventListener("click", checkPassword);
+document.getElementById("closePopup").addEventListener("click", closePasswordPrompt);
+document.getElementById("evilPassword").addEventListener("keypress", (e) => {
   if (e.key === "Enter") checkPassword();
 });
 
-  // Weitere Event-Listener (Senden, Eingabe, Clear) hier falls benötigt
+
   console.log("Script main.js loaded");
 });
