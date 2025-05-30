@@ -190,20 +190,20 @@ button.extra:hover {
 }
 
 #imagePreview {
-  display: none; /* Standardmäßig versteckt */
-  max-width: 100%; /* Das Bild passt sich der Containergröße an */
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Leichter Schatten um das Bild */
-  overflow: hidden;
-  margin-top: 10px;
-  text-align: center;
+  display: none; /* Standard versteckt */
+  margin-bottom: 10px;
+  max-width: 120px; /* Kleinere Größe */
+  max-height: 90px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+
 #imagePreview img {
-  max-width: 100%;  /* Bild nimmt die volle Breite des Containers ein */
-  max-height: 300px; /* Bildhöhe beschränken */
-  border-radius: 10px;
-  object-fit: cover; /* Verhindert Verzerrung des Bildes */
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 #imagePreview.show {
