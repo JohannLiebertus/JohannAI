@@ -1437,3 +1437,36 @@ body.dark-mode .chat-display {
 body.dark-mode .input-section {
   background-color: #2a2a2a !important;
 }
+
+
+@media (max-width: 600px) {
+  .input-section {
+    display: flex;
+    flex-direction: row; /* Nebeneinander statt übereinander */
+    gap: 8px; /* Abstand zwischen den Elementen */
+  }
+
+  .input-section input[type="text"] {
+    flex: 1; /* Input nimmt so viel Platz wie möglich */
+    min-width: 0; /* wichtig für korrekte Größenanpassung */
+  }
+
+  .file-btn {
+    flex-shrink: 0; /* Verhindert, dass der Button schrumpft */
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+
+  .send-btn {
+    flex-shrink: 0;
+    width: auto; /* Nur so breit wie der Text */
+    padding: 0 16px;
+    font-size: 16px;
+  }
+
+  .extra-buttons {
+    margin-top: 6px; /* optional, Abstand oben */
+  }
+}
+
