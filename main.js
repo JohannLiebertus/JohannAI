@@ -326,38 +326,45 @@ Rizz AI:
     imageInput.value = "";
   }
 
-  async function handleResponse(res) {
-    hideTypingIndicator();
-    if (!res.ok) {
-      console.error("Serverantwort nicht OK:", res.status);
-      throw new Error(`HTTP ${res.status}`);
-    }
-    const ct = res.headers.get("content-type") || "";
-    if (!ct.includes("application/json")) {
-      console.error("Unerwarteter Content-Type:", ct);
-      throw new Error("Keine JSON-Antwort");
-    }
-    const data = await res.json();
-    if (currentMode === "evil") {
-      const msgWrapper = document.createElement("div");
-      msgWrapper.className = `chat-msg-wrapper bot`;
-
-      const profilePic = document.createElement("img");
-      profilePic.className = "profile-pic";
-      profilePic.src = modeAvatars["evil"];
-
-      const msg = document.createElement("div");
-      msg.className = `chat-msg bot`;
-      msg.textContent = data.response || "Keine Antwort vom Bot.";
-
-      msgWrapper.appendChild(profilePic);
-      msgWrapper.appendChild(msg);
-      chatDisplay.appendChild(msgWrapper);
-      chatDisplay.scrollTop = chatDisplay.scrollHeight;
-    } else {
-      addMessage("bot", data.response || "Keine Antwort vom Bot.");
-    }
+async function handleResponse(res) {
+  hideTypingIndicator();
+  if (!res.ok) {
+    console.error("Serverantwort nicht OK:", res.status);
+    throw new Error(`HTTP ${res.status}`);
   }
+  const ct = res.headers.get("content-type") || "";
+  if (!ct.includes("application/json")) {
+    console.error("Unerwarteter Content-Type:", ct);
+    throw new Error("Keine JSON-Antwort");
+  }
+  const data = await res.json();
+  if (currentMode === "evil") {
+    const msgWrapper = document.createElement("div");
+    msgWrapper.className = `chat-msg-wrapper bot`;
+
+    const profilePic = document.createElement("img");
+    profilePic.className = "profile-pic";
+    profilePic.src = modeAvatars["evil"];
+
+    const msg = document.createElement("div");
+    msg.className = `chat-msg bot`;
+    msg.textContent = data.response || "Keine Antwort vom Bot.";
+
+    msgWrapper.appendChild(profilePic);
+    msgWrapper.appendChild(msg);
+    chatDisplay.appendChild(msgWrapper);
+
+    // Hier automatisch ganz runter scrollen:
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+
+  } else {
+    addMessage("bot", data.response || "Keine Antwort vom Bot.");
+
+    // Hier sicherstellen, dass auch runtergescrollt wird:
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+  }
+}
+
 
   clearBtn.addEventListener("click", () => {
     chatDisplay.innerHTML = "";
