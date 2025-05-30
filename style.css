@@ -928,20 +928,16 @@ body.dark-mode .extra {
   right: 0;
   width: 300px;
   height: 100%;
-  background-color: rgba(34, 34, 34, 0.95);
+  background-color: rgba(34, 34, 34, 0.95); /* dunkle Farbe */
   backdrop-filter: blur(10px);
-  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.8);
+  color: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4); /* etwas stärkerer Schatten */
   transform: translateX(100%);
   opacity: 0;
   transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  pointer-events: none;
   z-index: 1001;
   display: block;
-  pointer-events: none;
-
-  /* Hier der Regenbogen-Rand */
-  border-left: 6px solid transparent;
-  position: relative;
-  overflow: hidden;
 }
 
 .mode-sidebar::before {
@@ -978,23 +974,15 @@ body.dark-mode .extra {
 }
 
 .mode-sidebar.light-mode {
-  width: 300px; /* Feste Breite wie vorher */
   position: fixed;
   top: 0;
   right: 0;
+  width: 300px;
   height: 100%;
-  
   background-color: rgba(168, 163, 163, 0.95);
-  backdrop-filter: none; /* Optional, kann auch blur bleiben */
+  backdrop-filter: none;
   color: #222;
-  
-  /* Mehrlagiger Schatten für mehr Tiefe, ohne Größe zu ändern */
-  box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.15),
-    0 8px 16px rgba(0, 0, 0, 0.1),
-    0 12px 24px rgba(0, 0, 0, 0.05);
-  
-  /* Animation für das Herausfahren, bleibt bei fester Breite */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   transform: translateX(100%);
   opacity: 0;
   transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out;
