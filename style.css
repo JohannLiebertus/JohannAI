@@ -107,14 +107,21 @@ input[type="text"] {
     margin-right: 10px;
 }
 
-button.send-btn {
-    background-color: #189907;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-size: 14px;
-    cursor: pointer;
+.send-btn {
+  padding: 10px 20px; /* Etwas Platz links und rechts */
+  width: auto;        /* Keine feste Breite, nur so breit wie Inhalt */
+  min-width: 0;       /* Verhindert Mindestbreite */
+  display: inline-block; /* Damit Button sich an Inhalt anpasst */
+  cursor: pointer;
+  border: none;
+  border-radius: 20px;
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 5px 0 #1e7e34;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
 button.send-btn:hover {
