@@ -152,6 +152,10 @@ button.extra:hover {
 
 .image-upload-section {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 #imageInput {
@@ -165,14 +169,28 @@ button.extra:hover {
 }
 
 #imagePreview {
-  margin-top: 15px;
-  max-width: 100%;
+  display: none; /* Standardmäßig versteckt */
+  max-width: 100%; /* Das Bild passt sich der Containergröße an */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Leichter Schatten um das Bild */
+  overflow: hidden;
+  margin-top: 10px;
+  text-align: center;
 }
 
 #imagePreview img {
-  max-width: 100%;
+  max-width: 100%;  /* Bild nimmt die volle Breite des Containers ein */
+  max-height: 300px; /* Bildhöhe beschränken */
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  object-fit: cover; /* Verhindert Verzerrung des Bildes */
+}
+
+#imagePreview.show {
+  display: block;  /* Das Bild anzeigen */
+}
+
+#image-input {
+  display: none; /* Versteckt das Input-Feld */
 }
 
 .chat-msg {
@@ -615,52 +633,47 @@ body.dark-mode .extra {
 }
 
 
+
 .file-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #007bff;
+  background-color: #2ecc71;
   color: white;
-  font-size: 20px;
-  width: 38px;
-  height: 38px;
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   cursor: pointer;
-  user-select: none;
   transition: background-color 0.3s ease;
-  margin-right: 8px;
-  border: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .file-btn:hover {
-  background-color: #0056b3;
+  background-color: #27ae60;
 }
 
 
 .send-btn {
+  max-width: 200px; /* Fixiert eine Breite */
+  padding: 10px 18px;
   background-color: #28a745;
   color: white;
   border: none;
-  border-radius: 20px;
-  padding: 10px 18px;
-  font-weight: bold;
-  font-size: 14px;
+  border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 5px 0 #1e7e34;
-  transition: all 0.2s ease;
-  user-select: none;
+  font-size: 16px;
+  transition: all 0.3s ease;
 }
 
 .send-btn:hover {
   background-color: #218838;
-  box-shadow: 0 8px 15px rgba(33, 136, 56, 0.6);
-  transform: translateY(-3px);
+  transform: scale(1.05);
 }
 
 .send-btn:active {
-  box-shadow: 0 3px 7px rgba(33, 136, 56, 0.8);
-  transform: translateY(1px);
+  transform: scale(0.95);
 }
 
 .mode-switch {
