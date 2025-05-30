@@ -324,6 +324,8 @@ Rizz AI:
 
     userInput.value = "";
     imageInput.value = "";
+    previewImg.src = "";
+    imagePreview.style.display = "none";
   }
 
 async function handleResponse(res) {
@@ -409,3 +411,5 @@ async function handleResponse(res) {
 
   console.log("Script main.js loaded");
 });
+
+
