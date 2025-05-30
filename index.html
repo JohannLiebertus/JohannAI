@@ -49,11 +49,12 @@
     <!-- Füge diese Zeile direkt unter #chat-display ein -->
 
 
-    <div class="input-section">
-      <input type="text" id="user-input" placeholder="Nachricht eingeben...">
-      <label for="image-input" class="file-btn" title="Bild anhängen">📎</label>
-      <button id="send-btn" class="send-btn">Send</button>
-    </div>
+<div class="input-section">
+  <input type="text" id="user-input" placeholder="Nachricht eingeben...">
+  <input type="file" id="image-input" accept="image/*" style="display:none;">
+  <label for="image-input" class="file-btn" title="Bild anhängen">📎</label>
+  <button id="send-btn" class="send-btn">Send</button>
+</div>
     <!-- Füge dies direkt unterhalb der "input-section" ein (also nach den Buttons und Input-Feldern) -->
 
 <div class="image-upload-section">
