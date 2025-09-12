@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Andere Variablen
-  const API_URL = "https://johannai.onrender.com";
+  const API_URL = "https://johannai-m10o.onrender.com";
   const sendBtn = document.getElementById("send-btn");
   const userInput = document.getElementById("user-input");
   const chatDisplay = document.getElementById("chat-display");
@@ -411,5 +411,6 @@ async function handleResponse(res) {
 
   console.log("Script main.js loaded");
 });
+
 
 
