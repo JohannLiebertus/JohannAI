@@ -18,13 +18,13 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
 # API-Schlüssel aus der Umgebungsvariable laden
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_API_KEY = os.environ.get("AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w")
 if not GEMINI_API_KEY:
     print("❌ FEHLER: GEMINI_API_KEY ist NICHT in den Umgebungsvariablen gesetzt.")
     
 try:
     if GEMINI_API_KEY:
-        genai.configure(api_key=AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w)
+        genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel("gemini-1.5-flash")
     else:
         model = None
