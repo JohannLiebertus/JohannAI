@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
 # API-Key direkt hier (nicht empfohlen für Produktion)
-genai.configure(api_key="AIzaSyDxchMdZQeSDSIqkSi8M3_aiwZL4neahMk")
+genai.configure(api_key="AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 def get_personality(mode: str) -> str:
@@ -116,3 +116,4 @@ def chat_image():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
