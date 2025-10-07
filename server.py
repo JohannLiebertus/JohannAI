@@ -18,7 +18,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
 # API-Schlüssel aus der Umgebungsvariable laden (Sicherheitsmaßnahme!)
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_API_KEY = os.environ.get("AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w")
 if not GEMINI_API_KEY:
     # Fehler im Log, falls der Schlüssel fehlt
     print("❌ FEHLER: GEMINI_API_KEY ist NICHT in den Umgebungsvariablen gesetzt.")
