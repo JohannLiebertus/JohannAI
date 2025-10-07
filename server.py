@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
-# import google.generativeai.types as gtypes # <--- WIRD JETZT NICHT MEHR BENÖTIGT
 import base64
 import os
 import json
@@ -11,32 +10,27 @@ from typing import List, Dict, Any
 app = Flask(__name__)
 
 # -------------------------------------------------------
-# Konfiguration & Sicherheit
+# Konfiguration & ACHTUNG: Hardcodierter API-Schlüssel
 # -------------------------------------------------------
 
 # CORS nur für deine GitHub-Page
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
-# API-Schlüssel aus der Umgebungsvariable laden
-GEMINI_API_KEY = os.environ.get("AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w")
-if not GEMINI_API_KEY:
-    print("❌ FEHLER: GEMINI_API_KEY ist NICHT in den Umgebungsvariablen gesetzt.")
-    
+# ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code. 
+# Bitte auf Render LÖSCHEN, wenn der Key dort als Umgebungsvariable gesetzt wird.
+API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
+
 try:
-    if GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-    else:
-        model = None
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel("gemini-1.5-flash")
 except Exception as e:
     print(f"❌ FEHLER bei der Konfiguration des Gemini-Modells: {e}")
     model = None
 
 # -------------------------------------------------------
-# Persönlichkeits-Prompts (Unverändert übernommen)
+# Persönlichkeits-Prompts
 # -------------------------------------------------------
 def get_personality(mode: str) -> str:
-    # Die Prompts wurden aus dem Originalskript 1:1 übernommen.
     if mode == "johann":
         return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
         
@@ -100,7 +94,7 @@ def format_history_for_gemini(history: List[Dict[str, Any]], personality_prompt:
     for h in conversation_history:
         role = "user" if h.get("role") == "user" else "model"
         content = h.get("content", "")
-        # Korrekte Formatierung: {"role": "...", "parts": [{"text": "..."}]}
+        # KORREKTUR: Formatierung: {"role": "...", "parts": [{"text": "..."}]}
         messages.append({"role": role, "parts": [{"text": content}]})
 
     # 3. Aktuelle Benutzer-Nachricht hinzufügen
@@ -166,8 +160,7 @@ def chat_image():
             
         img_data = img_file.read()
         
-        # 🐛 KORREKTUR: Alternative, robuste Methode zur Erstellung des Bild-Objekts
-        # Wir verwenden das Gemini-Format direkt, ohne komplizierte Imports.
+        # KORREKTUR: Robuste Methode zur Erstellung des Bild-Objekts (vermeidet ImportError)
         img_part = {
             "inline_data": {
                 "data": base64.b64encode(img_data).decode("utf-8"),
@@ -204,7 +197,8 @@ def chat_image():
         # 3. Aktuelle User-Nachricht (Bild und Text)
         parts = [img_part]
         if text.strip():
-            parts.append({"text": text}) # ACHTUNG: Auch Text muss hier als Objekt sein
+            # KORREKTUR: Auch Text muss hier als Objekt im Parts-Array sein (für Multimodale Anfragen)
+            parts.append({"text": text})
             
         messages.append({"role": "user", "parts": parts})
 
@@ -223,9 +217,6 @@ def chat_image():
 # Server starten
 # -------------------------------------------------------
 if __name__ == "__main__":
-    if GEMINI_API_KEY is None:
-        print("🚨 Serverstart abgebrochen, da GEMINI_API_KEY fehlt. Bitte Umgebungsvariable setzen. 🚨")
-    else:
-        port = int(os.environ.get("PORT", 5000))
-        print(f"🚀 Server läuft auf Port {port}")
-        app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"🚀 Server läuft auf Port {port}")
+    app.run(host="0.0.0.0", port=port)
