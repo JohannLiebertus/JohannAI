@@ -21,16 +21,11 @@ API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
 
 try:
     genai.configure(api_key=API_KEY)
-    # Das Modell wird hier noch nicht instanziiert, da wir es in den Endpunkten 
-    # mit der richtigen Konfiguration (system_instruction) neu erstellen werden.
-    pass 
 except Exception as e:
     print(f"❌ FEHLER bei der Konfiguration des Gemini-Modells: {e}")
-    # Wenn die Konfiguration fehlschlägt, setzen wir eine Variable, um dies abzufangen.
     API_KEY_CONFIGURED = False
 else:
     API_KEY_CONFIGURED = True
-
 
 # -------------------------------------------------------
 # Persönlichkeits-Prompts (Unverändert)
@@ -81,30 +76,31 @@ def get_personality(mode: str) -> str:
 # Hilfsfunktion zur Formatierung der Historie
 # -------------------------------------------------------
 def format_history_for_gemini(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Extrahiert NUR die Konversations-Historie ohne den System-Prompt."""
+    """Extrahiert NUR die Konversations-Historie, um sie an die API zu senden."""
     
-    # Die gesendete Historie des Clients enthält den System-Prompt (Index 0) 
-    # und die aktuelle Nachricht (letztes Element). Wir wollen NUR die echten Konversationsschritte.
+    # Im Frontend scheint die Historie mit dem System-Prompt und der aktuellen 
+    # Nachricht gesendet zu werden. Wir extrahieren nur die echten Konversationsschritte.
     
-    # Konversation beginnt bei Index 1 und endet vor dem letzten Element.
+    # Wenn weniger als 2 Elemente (System-Prompt + aktuelle Nachricht) vorhanden sind, ist die Historie leer.
     if len(history) < 2:
         return []
 
-    # Wir formatieren nur die tatsächliche Konversation (Hintergrund-Gespräche)
+    # Die Historie ist der Bereich zwischen dem System-Prompt (Index 0) 
+    # und der letzten Nachricht (Index -1)
     conversation_history = history[1:-1]
     
     messages = []
     for h in conversation_history:
         role = "user" if h.get("role") == "user" else "model"
         content = h.get("content", "")
-        # Korrekte Formatierung: {"role": "...", "parts": [{"text": "..."}]}
+        # Gemini-Format: {"role": "...", "parts": [{"text": "..."}]}
         messages.append({"role": role, "parts": [{"text": content}]})
     
     return messages
 
 
 # -------------------------------------------------------
-# Chat-Endpoint (Text-Anfragen) - HAUOTKORREKTUR HIER
+# Chat-Endpoint (Text-Anfragen)
 # -------------------------------------------------------
 @app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
@@ -123,7 +119,7 @@ def chat():
         if not user_msg.strip():
             return jsonify({"error": "Leere Nachricht"}), 400
 
-        # 1. System-Prompt auslesen und als Konfiguration übergeben
+        # 1. System-Prompt als Konfiguration
         personality_prompt = get_personality(mode)
         
         # 2. Reine Konversations-Historie extrahieren
@@ -147,7 +143,7 @@ def chat():
         return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
         
     except Exception as e:
-        # Dies sollte jetzt nur noch bei echten API-Fehlern passieren.
+        # Wenn der Fehler immer noch auftritt, liegt er hier.
         print("❌ FEHLER IN /chat (500 Internal Server Error):\n", traceback.format_exc())
         return jsonify({"error": "Ein interner Serverfehler ist aufgetreten. Prüfen Sie das Render-Log."}), 500
 
@@ -171,10 +167,12 @@ def chat_image():
         
         # 1. Bild-Teil erstellen (Robust gegen ImportError)
         if not img_file:
+            # Wenn kein Bild gesendet wurde, wird dies als normaler Text-Chat behandelt.
             return jsonify({"error": "Kein Bild empfangen"}), 400
             
         img_data = img_file.read()
         
+        # Base64-Kodierung für das Gemini-Format (umgeht Import-Probleme)
         img_part = {
             "inline_data": {
                 "data": base64.b64encode(img_data).decode("utf-8"),
@@ -188,7 +186,7 @@ def chat_image():
         except Exception:
             history = [] 
 
-        # 3. System-Prompt als Konfiguration verwenden
+        # 3. System-Prompt als Konfiguration
         personality_prompt = get_personality(mode)
         
         # Reine Konversations-Historie (ohne System-Prompt)
@@ -197,6 +195,7 @@ def chat_image():
         # 4. Aktuelle User-Nachricht (Bild und Text)
         parts = [img_part]
         if text.strip():
+            # Wichtig: Text muss auch als Objekt im Parts-Array sein.
             parts.append({"text": text})
             
         messages.append({"role": "user", "parts": parts})
@@ -224,7 +223,9 @@ def chat_image():
 # Server starten
 # -------------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Server läuft auf Port {port}")
-    app.run(host="0.0.0.0", port=port)
-
+    if not API_KEY_CONFIGURED:
+        print("🚨 Server wird nicht gestartet, da der API-Schlüssel ungültig ist. 🚨")
+    else:
+        port = int(os.environ.get("PORT", 5000))
+        print(f"🚀 Server läuft auf Port {port}")
+        app.run(host="0.0.0.0", port=port)
