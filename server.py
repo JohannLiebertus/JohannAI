@@ -17,18 +17,23 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
 # ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code. 
-# Bitte auf Render LÖSCHEN, wenn der Key dort als Umgebungsvariable gesetzt wird.
 API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
 
 try:
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    # Das Modell wird hier noch nicht instanziiert, da wir es in den Endpunkten 
+    # mit der richtigen Konfiguration (system_instruction) neu erstellen werden.
+    pass 
 except Exception as e:
     print(f"❌ FEHLER bei der Konfiguration des Gemini-Modells: {e}")
-    model = None
+    # Wenn die Konfiguration fehlschlägt, setzen wir eine Variable, um dies abzufangen.
+    API_KEY_CONFIGURED = False
+else:
+    API_KEY_CONFIGURED = True
+
 
 # -------------------------------------------------------
-# Persönlichkeits-Prompts
+# Persönlichkeits-Prompts (Unverändert)
 # -------------------------------------------------------
 def get_personality(mode: str) -> str:
     if mode == "johann":
@@ -75,44 +80,39 @@ def get_personality(mode: str) -> str:
 # -------------------------------------------------------
 # Hilfsfunktion zur Formatierung der Historie
 # -------------------------------------------------------
-def format_history_for_gemini(history: List[Dict[str, Any]], personality_prompt: str, user_msg: str) -> List[Dict[str, Any]]:
-    """Formatiert die Chat-Historie des Clients in das vom Gemini-API erwartete Format."""
+def format_history_for_gemini(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Extrahiert NUR die Konversations-Historie ohne den System-Prompt."""
     
-    # 1. System-Prompt hinzufügen (als erste 'user' Nachricht)
-    messages = [
-        {"role": "user", "parts": [{"text": personality_prompt}]}
-    ]
-
     # Die gesendete Historie des Clients enthält den System-Prompt (Index 0) 
-    # und die aktuelle Nachricht (letztes Element). Wir filtern diese heraus.
-    if len(history) > 2:
-        conversation_history = history[1:-1]
-    else:
-        conversation_history = []
+    # und die aktuelle Nachricht (letztes Element). Wir wollen NUR die echten Konversationsschritte.
+    
+    # Konversation beginnt bei Index 1 und endet vor dem letzten Element.
+    if len(history) < 2:
+        return []
 
-    # 2. Bestehende Konversation hinzufügen
+    # Wir formatieren nur die tatsächliche Konversation (Hintergrund-Gespräche)
+    conversation_history = history[1:-1]
+    
+    messages = []
     for h in conversation_history:
         role = "user" if h.get("role") == "user" else "model"
         content = h.get("content", "")
-        # KORREKTUR: Formatierung: {"role": "...", "parts": [{"text": "..."}]}
+        # Korrekte Formatierung: {"role": "...", "parts": [{"text": "..."}]}
         messages.append({"role": role, "parts": [{"text": content}]})
-
-    # 3. Aktuelle Benutzer-Nachricht hinzufügen
-    messages.append({"role": "user", "parts": [{"text": user_msg}]})
     
     return messages
 
 
 # -------------------------------------------------------
-# Chat-Endpoint (Text-Anfragen)
+# Chat-Endpoint (Text-Anfragen) - HAUOTKORREKTUR HIER
 # -------------------------------------------------------
 @app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
     if request.method == "OPTIONS":
         return '', 204
     
-    if model is None:
-        return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt oder ist ungültig)."}), 503
+    if not API_KEY_CONFIGURED:
+        return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel ungültig)."}), 503
         
     try:
         data = request.get_json(force=True)
@@ -123,18 +123,33 @@ def chat():
         if not user_msg.strip():
             return jsonify({"error": "Leere Nachricht"}), 400
 
+        # 1. System-Prompt auslesen und als Konfiguration übergeben
         personality_prompt = get_personality(mode)
         
-        messages = format_history_for_gemini(history, personality_prompt, user_msg)
+        # 2. Reine Konversations-Historie extrahieren
+        messages = format_history_for_gemini(history)
         
-        resp = model.generate_content(messages)
+        # 3. Aktuelle Benutzer-Nachricht hinzufügen
+        messages.append({"role": "user", "parts": [{"text": user_msg}]})
+        
+        # 4. Modellanfrage mit system_instruction
+        model_instance = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            # KORREKTUR: System-Prompt als system_instruction übergeben
+            config=genai.types.GenerateContentConfig(
+                system_instruction=personality_prompt
+            )
+        )
+        
+        resp = model_instance.generate_content(messages)
         text = getattr(resp, "text", None)
 
         return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
         
     except Exception as e:
+        # Dies sollte jetzt nur noch bei echten API-Fehlern passieren.
         print("❌ FEHLER IN /chat (500 Internal Server Error):\n", traceback.format_exc())
-        return jsonify({"error": "Ein interner Serverfehler ist aufgetreten."}), 500
+        return jsonify({"error": "Ein interner Serverfehler ist aufgetreten. Prüfen Sie das Render-Log."}), 500
 
 
 # -------------------------------------------------------
@@ -145,8 +160,8 @@ def chat_image():
     if request.method == "OPTIONS":
         return '', 204
         
-    if model is None:
-        return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt oder ist ungültig)."}), 503
+    if not API_KEY_CONFIGURED:
+        return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel ungültig)."}), 503
 
     try:
         img_file = request.files.get("image")
@@ -154,13 +169,12 @@ def chat_image():
         mode = request.form.get("mode", "johann")
         history_str = request.form.get("history", "[]") 
         
-        # 1. Bild-Teil erstellen
+        # 1. Bild-Teil erstellen (Robust gegen ImportError)
         if not img_file:
             return jsonify({"error": "Kein Bild empfangen"}), 400
             
         img_data = img_file.read()
         
-        # KORREKTUR: Robuste Methode zur Erstellung des Bild-Objekts (vermeidet ImportError)
         img_part = {
             "inline_data": {
                 "data": base64.b64encode(img_data).decode("utf-8"),
@@ -168,42 +182,35 @@ def chat_image():
             }
         }
         
-        # 2. Historie deserialisieren
+        # 2. Historie deserialisieren und formatieren
         try:
             history = json.loads(history_str)
         except Exception:
             history = [] 
 
-        
-        # Aufbau des Nachrichten-Arrays (inkl. Prompt und History)
+        # 3. System-Prompt als Konfiguration verwenden
         personality_prompt = get_personality(mode)
         
-        # System-Prompt (als erster user)
-        messages = [
-            {"role": "user", "parts": [{"text": personality_prompt}]}
-        ]
-        
-        # Bestehende Konversation (ohne System-Prompt und ohne aktuelle Nachricht)
-        if len(history) > 1:
-            conversation_history = history[1:]
-        else:
-            conversation_history = []
+        # Reine Konversations-Historie (ohne System-Prompt)
+        messages = format_history_for_gemini(history)
             
-        for h in conversation_history:
-            role = "user" if h.get("role") == "user" else "model"
-            content = h.get("content", "")
-            messages.append({"role": role, "parts": [{"text": content}]})
-
-        # 3. Aktuelle User-Nachricht (Bild und Text)
+        # 4. Aktuelle User-Nachricht (Bild und Text)
         parts = [img_part]
         if text.strip():
-            # KORREKTUR: Auch Text muss hier als Objekt im Parts-Array sein (für Multimodale Anfragen)
             parts.append({"text": text})
             
         messages.append({"role": "user", "parts": parts})
 
-        # 4. Generierung
-        resp = model.generate_content(messages)
+        # 5. Generierung mit system_instruction
+        model_instance = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            # KORREKTUR: System-Prompt als system_instruction übergeben
+            config=genai.types.GenerateContentConfig(
+                system_instruction=personality_prompt
+            )
+        )
+        
+        resp = model_instance.generate_content(messages)
         text_resp = getattr(resp, "text", None)
 
         return jsonify({"response": text_resp or "Keine Antwort vom Modell erhalten."})
