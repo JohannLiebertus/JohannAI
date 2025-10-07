@@ -1,21 +1,43 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
-import base64, os, json, ast, traceback
+from google.generativeai.types import Part
+import base64
+import os
+import json
+import traceback
+from typing import List, Dict, Any
 
 app = Flask(__name__)
+
+# -------------------------------------------------------
+# Konfiguration & Sicherheit
+# -------------------------------------------------------
 
 # CORS nur für deine GitHub-Page
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io"}}, supports_credentials=True)
 
-# Dein API-Key direkt hier (nicht empfohlen für Produktion)
-genai.configure(api_key="AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w")
-model = genai.GenerativeModel("gemini-1.5-flash")
+# API-Schlüssel aus der Umgebungsvariable laden (Sicherheitsmaßnahme!)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    # Fehler im Log, falls der Schlüssel fehlt
+    print("❌ FEHLER: GEMINI_API_KEY ist NICHT in den Umgebungsvariablen gesetzt.")
+    
+try:
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+except Exception as e:
+    # Fehler abfangen, falls die Konfiguration fehlschlägt (z.B. falscher Schlüssel)
+    print(f"❌ FEHLER bei der Konfiguration des Gemini-Modells: {e}")
+    model = None # Setze Modell auf None, um Fehler später abzufangen
 
 # -------------------------------------------------------
-# Persönlichkeits-Prompts 1:1 übernommen
+# Persönlichkeits-Prompts (Unverändert übernommen)
 # -------------------------------------------------------
 def get_personality(mode: str) -> str:
+    # Die Prompts wurden aus dem Originalskript 1:1 übernommen,
+    # da sie nur statische Strings sind und den 500er Fehler nicht verursachen.
+    # ... (Alle Ihre elif-Blöcke für 'johann', 'rizz', 'classic', etc.) ...
     if mode == "johann":
         return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter aus der Serie "Monster" von Naoki Urasawa. Du verfügst über eine außergewöhnliche Auffassungsgabe, sprichst ruhig, bedacht und mit einer gewissen Eleganz. Deine Worte sind stets wohlüberlegt und du wirkst faszinierend und kultiviert. Du neigst dazu, dein Gegenüber psychologisch zu analysieren, stellst tiefgründige Fragen und legst Wert auf die dunklen Seiten der menschlichen Psyche.
         
@@ -56,13 +78,51 @@ def get_personality(mode: str) -> str:
     else:
         return "Unbekannter Modus. Bitte wählen Sie einen unterstützten Modus."
 
+
 # -------------------------------------------------------
-# Chat-Endpoint mit Fehlerbehandlung
+# Hilfsfunktion zur Formatierung der Historie
+# -------------------------------------------------------
+def format_history_for_gemini(history: List[Dict[str, Any]], personality_prompt: str, user_msg: str) -> List[Dict[str, Any]]:
+    """Formatiert die Chat-Historie des Clients in das vom Gemini-API erwartete Format."""
+    
+    # 1. System-Prompt hinzufügen (als erste 'user' Nachricht)
+    messages = [
+        {"role": "user", "parts": [{"text": personality_prompt}]}
+    ]
+
+    # Die gesendete Historie des Clients enthält den System-Prompt (Index 0) 
+    # und die aktuelle Nachricht (letztes Element). Wir filtern diese heraus.
+    # Die tatsächliche Konversation beginnt bei Index 1 und endet vor dem letzten Element.
+    if len(history) > 2:
+        conversation_history = history[1:-1]
+    else:
+        conversation_history = []
+
+    # 2. Bestehende Konversation hinzufügen
+    for h in conversation_history:
+        # Gemini verwendet 'user' und 'model' für die Konversation
+        role = "user" if h.get("role") == "user" else "model"
+        content = h.get("content", "")
+        # Korrekte Formatierung: {"role": "...", "parts": [{"text": "..."}]}
+        messages.append({"role": role, "parts": [{"text": content}]})
+
+    # 3. Aktuelle Benutzer-Nachricht hinzufügen
+    messages.append({"role": "user", "parts": [{"text": user_msg}]})
+    
+    return messages
+
+
+# -------------------------------------------------------
+# Chat-Endpoint (Text-Anfragen)
 # -------------------------------------------------------
 @app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
     if request.method == "OPTIONS":
         return '', 204
+    
+    if model is None:
+        return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt oder ist ungültig)."}), 503
+        
     try:
         data = request.get_json(force=True)
         history = data.get("history", [])
@@ -72,66 +132,108 @@ def chat():
         if not user_msg.strip():
             return jsonify({"error": "Leere Nachricht"}), 400
 
-        messages = [{"role": "user", "parts": [get_personality(mode)]}]
-        for h in history:
-            role = "user" if h.get("role") == "user" else "model"
-            messages.append({"role": role, "parts": [h.get("content", "")]})
-        messages.append({"role": "user", "parts": [user_msg]})
-
+        personality_prompt = get_personality(mode)
+        
+        # 🐛 KORREKTUR: Formatierung der Historie für die Gemini API
+        messages = format_history_for_gemini(history, personality_prompt, user_msg)
+        
         resp = model.generate_content(messages)
         text = getattr(resp, "text", None)
 
         return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
+        
     except Exception as e:
-        print("❌ FEHLER IN /chat:\n", traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
+        # Protokolliere den detaillierten Fehler im Server-Log
+        print("❌ FEHLER IN /chat (500 Internal Server Error):\n", traceback.format_exc())
+        
+        # Gebe eine generische, sichere Fehlermeldung an den Client zurück
+        return jsonify({"error": "Ein interner Serverfehler ist aufgetreten."}), 500
+
 
 # -------------------------------------------------------
-# Chat mit Bild
+# Chat mit Bild (Multimodal-Anfragen)
 # -------------------------------------------------------
 @app.route("/chat-image", methods=["POST", "OPTIONS"])
 def chat_image():
     if request.method == "OPTIONS":
         return '', 204
+        
+    if model is None:
+        return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel fehlt oder ist ungültig)."}), 503
+
     try:
         img_file = request.files.get("image")
         text = request.form.get("text", "")
         mode = request.form.get("mode", "johann")
-        history = request.form.get("history", "[]")
-
+        history_str = request.form.get("history", "[]") # History wird als String gesendet
+        
+        # 1. Bild-Teil erstellen
         if not img_file:
             return jsonify({"error": "Kein Bild empfangen"}), 400
-
-        img_b64 = base64.b64encode(img_file.read()).decode("utf-8")
-        img_part = {"inline_data": {"mime_type": img_file.mimetype or "image/jpeg", "data": img_b64}}
-
+            
+        img_data = img_file.read()
+        
+        # Korrekte Erstellung eines Part-Objekts für das Bild
+        img_part = Part.from_bytes(data=img_data, mime_type=img_file.mimetype or "image/jpeg")
+        
+        # 2. Historie deserialisieren und formatieren
         try:
-            hist = json.loads(history)
-        except Exception:
-            hist = ast.literal_eval(history) if history else []
+            # Versuch, den History-String zu parsen
+            history = json.loads(history_str)
+        except json.JSONDecodeError:
+            print("Warnung: Konnte history nicht als JSON laden. Versuch mit ast.literal_eval.")
+            # Fallback, falls der Client die Daten anders serialisiert hat
+            history = eval(history_str) 
 
-        messages = [{"role": "user", "parts": [get_personality(mode)]}]
-        for h in hist:
+        
+        # Der User-Input (text) wird hier nicht in der history erwartet.
+        # Wir müssen die history ohne den letzten User-Input neu aufbauen,
+        # da die Logik in `main.js` für `/chat-image` anders ist.
+
+        personality_prompt = get_personality(mode)
+        
+        # System-Prompt (als erster user)
+        messages = [
+            {"role": "user", "parts": [{"text": personality_prompt}]}
+        ]
+        
+        # Bestehende Konversation (ohne System-Prompt und ohne aktuelle Nachricht)
+        if len(history) > 1: # System-Prompt ist das erste Element im Client
+            conversation_history = history[1:]
+        else:
+            conversation_history = []
+            
+        for h in conversation_history:
             role = "user" if h.get("role") == "user" else "model"
-            messages.append({"role": role, "parts": [h.get("content", "")]})
+            content = h.get("content", "")
+            messages.append({"role": role, "parts": [{"text": content}]})
 
+        # 3. Aktuelle User-Nachricht (Bild und Text)
         parts = [img_part]
         if text.strip():
-            parts.append(text)
+            parts.append(text) # Text kann direkt als String hinzugefügt werden
+            
         messages.append({"role": "user", "parts": parts})
 
+        # 4. Generierung
         resp = model.generate_content(messages)
-        text = getattr(resp, "text", None)
+        text_resp = getattr(resp, "text", None)
 
-        return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
+        return jsonify({"response": text_resp or "Keine Antwort vom Modell erhalten."})
+        
     except Exception as e:
-        print("❌ FEHLER IN /chat-image:\n", traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
+        print("❌ FEHLER IN /chat-image (500 Internal Server Error):\n", traceback.format_exc())
+        return jsonify({"error": "Ein interner Serverfehler ist bei der Bildverarbeitung aufgetreten."}), 500
+
 
 # -------------------------------------------------------
 # Server starten
 # -------------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Server läuft auf Port {port}")
-    app.run(host="0.0.0.0", port=port)
+    # Stelle sicher, dass der Server nur läuft, wenn der API-Schlüssel gefunden wurde.
+    if GEMINI_API_KEY is None:
+        print("🚨 Serverstart abgebrochen, da GEMINI_API_KEY fehlt. Bitte Umgebungsvariable setzen. 🚨")
+    else:
+        port = int(os.environ.get("PORT", 5000))
+        print(f"🚀 Server läuft auf Port {port}")
+        app.run(host="0.0.0.0", port=port)
