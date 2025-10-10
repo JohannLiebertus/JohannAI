@@ -18,7 +18,7 @@ CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io/Johan
 # -------------------------------------------------------
 # KONFIGURATION & API-SCHLÜSSEL
 # -------------------------------------------------------
-# 🔑 KORREKTUR: Schlüssel wird aus der Render-Umgebungsvariable ausgelesen.
+# 🔑 KORREKTUR: Schlüssel wird SICHER aus der Render-Umgebungsvariable ausgelesen.
 API_KEY = os.getenv("GEMINI_API_KEY") 
 API_KEY_CONFIGURED = False
 
@@ -37,11 +37,12 @@ except Exception as e:
 
 
 # -------------------------------------------------------
-# Persönlichkeits-Prompts (Hier gekürzt aus Platzgründen, muss vollständig sein)
+# Persönlichkeits-Prompts
 # -------------------------------------------------------
 def get_personality(mode: str) -> str:
-    # Stellen Sie sicher, dass hier alle Ihre Prompts stehen
+    # Stellen Sie sicher, dass hier ALLE Ihre Prompts stehen
     if mode == "johann":
+        # Bitte hier den vollständigen Prompt einfügen!
         return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter... (vollständiger Prompt)"""
     # ... (Rest der Prompts) ...
     else:
@@ -54,6 +55,7 @@ def get_personality(mode: str) -> str:
 def format_history_for_gemini(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     if len(history) < 2:
         return []
+    # Die Historie enthält den System-Prompt und die letzte Nachricht, die wir weglassen
     conversation_history = history[1:-1]
     messages = []
     for h in conversation_history:
@@ -102,11 +104,11 @@ def chat():
         return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
         
     except Exception as e:
-        # Fängt alle Fehler ab, einschließlich APIError, ohne speziellen Import
+        # Fängt alle Fehler ab
         print(f"❌ FEHLER IN /chat (Detail: {e}):\n", traceback.format_exc())
         
         # API-Probleme senden Status 500
-        return jsonify({"error": "Ein API- oder Serverfehler ist aufgetreten. Bitte prüfen Sie den API-Schlüssel."}), 500
+        return jsonify({"error": "Ein API- oder Serverfehler ist aufgetreten."}), 500
 
 
 # -------------------------------------------------------
@@ -121,7 +123,7 @@ def chat_image():
         return jsonify({"error": "Der KI-Dienst ist nicht konfiguriert (API-Schlüssel ungültig)."}), 503
 
     try:
-        # ... (Logik zur Bildverarbeitung wie in Version 11) ...
+        # ... (Logik zur Bildverarbeitung) ...
         img_file = request.files.get("image")
         text = request.form.get("text", "")
         mode = request.form.get("mode", "johann")
@@ -132,6 +134,7 @@ def chat_image():
             
         img_data = img_file.read()
         
+        # Erstellt das Part-Objekt manuell (da der Import Part entfernt wurde)
         img_part = {
             "inline_data": {
                 "data": base64.b64encode(img_data).decode("utf-8"),
@@ -171,14 +174,12 @@ def chat_image():
 
 
 # -------------------------------------------------------
-# Server starten
+# Server starten (NUR für Entwicklung – Auskommentiert für Render!)
 # -------------------------------------------------------
-if __name__ == "__main__":
-    if not API_KEY_CONFIGURED:
-        print("🚨 Server wird nicht gestartet, da der API-Schlüssel ungültig ist. 🚨")
-    else:
-        # ⚠️ WARNUNG: Dieser Code startet den Development-Server.
-        # Im Render Start Command sollte 'python -m gunicorn server:app' verwendet werden.
-        port = int(os.environ.get("PORT", 5000))
-        print(f"🚀 Server läuft auf Port {port}")
-        app.run(host="0.0.0.0", port=port)
+# if __name__ == "__main__":
+#     if not API_KEY_CONFIGURED:
+#         print("🚨 Server wird nicht gestartet, da der API-Schlüssel ungültig ist. 🚨")
+#     else:
+#         port = int(os.environ.get("PORT", 5000))
+#         print(f"🚀 Server läuft auf Port {port}")
+#         app.run(host="0.0.0.0", port=port)
