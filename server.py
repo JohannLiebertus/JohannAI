@@ -6,6 +6,7 @@ import os
 import json
 import traceback
 from typing import List, Dict, Any
+from google.generativeai.errors import APIError
 
 app = Flask(__name__)
 
@@ -13,13 +14,15 @@ app = Flask(__name__)
 # Konfiguration & ACHTUNG: Hardcodierter API-Schlüssel
 # -------------------------------------------------------
 
-# CORS nur für deine GitHub-Page
-CORS(app, resources={r"/*": {"origins": "https://github.com/JohannLiebertus/JohannAI/"}}, supports_credentials=True)
+# ✅ KORREKTUR: CORS mit Wildcard-Endpunkt für den Sub-Pfad des Frontends.
+# Dies sollte den "Load Failed" Fehler (wegen blockierter CORS-Antwort) beheben.
+CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io/JohannAI"}}, supports_credentials=True)
 
 # ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code. 
 API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
 
 try:
+    # Zurück zur einfacheren Konfiguration
     genai.configure(api_key=API_KEY)
 except Exception as e:
     print(f"❌ FEHLER bei der Konfiguration des Gemini-Modells: {e}")
@@ -28,7 +31,7 @@ else:
     API_KEY_CONFIGURED = True
 
 # -------------------------------------------------------
-# Persönlichkeits-Prompts (Unverändert)
+# Persönlichkeits-Prompts
 # -------------------------------------------------------
 def get_personality(mode: str) -> str:
     if mode == "johann":
@@ -76,17 +79,12 @@ def get_personality(mode: str) -> str:
 # Hilfsfunktion zur Formatierung der Historie
 # -------------------------------------------------------
 def format_history_for_gemini(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Extrahiert NUR die Konversations-Historie, um sie an die API zu senden."""
+    """Extrahiert NUR die Konversations-Historie (ohne System-Prompt und aktueller Nachricht)."""
     
-    # Im Frontend scheint die Historie mit dem System-Prompt und der aktuellen 
-    # Nachricht gesendet zu werden. Wir extrahieren nur die echten Konversationsschritte.
-    
-    # Wenn weniger als 2 Elemente (System-Prompt + aktuelle Nachricht) vorhanden sind, ist die Historie leer.
     if len(history) < 2:
         return []
 
-    # Die Historie ist der Bereich zwischen dem System-Prompt (Index 0) 
-    # und der letzten Nachricht (Index -1)
+    # Die Historie ist der Bereich zwischen dem System-Prompt (Index 0) und der letzten Nachricht (Index -1)
     conversation_history = history[1:-1]
     
     messages = []
@@ -131,7 +129,7 @@ def chat():
         # 4. Modellanfrage mit system_instruction
         model_instance = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            # KORREKTUR: System-Prompt als system_instruction übergeben
+            # System-Prompt als system_instruction übergeben
             config=genai.types.GenerateContentConfig(
                 system_instruction=personality_prompt
             )
@@ -142,9 +140,13 @@ def chat():
 
         return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
         
+    except APIError as e:
+        # Dies fängt spezifische API-Fehler (403, 400, 500) ab
+        print(f"❌ GEMINI API FEHLER (4xx/5xx): {e}")
+        return jsonify({"error": f"API-Fehler. Der Schlüssel ist möglicherweise ungültig oder hat Quota-Probleme. Details: {e}"}), 500
+
     except Exception as e:
-        # Wenn der Fehler immer noch auftritt, liegt er hier.
-        print("❌ FEHLER IN /chat (500 Internal Server Error):\n", traceback.format_exc())
+        print("❌ ALLGEMEINER FEHLER IN /chat:\n", traceback.format_exc())
         return jsonify({"error": "Ein interner Serverfehler ist aufgetreten. Prüfen Sie das Render-Log."}), 500
 
 
@@ -165,14 +167,13 @@ def chat_image():
         mode = request.form.get("mode", "johann")
         history_str = request.form.get("history", "[]") 
         
-        # 1. Bild-Teil erstellen (Robust gegen ImportError)
+        # 1. Bild-Teil erstellen (Robust gegen Import-Probleme)
         if not img_file:
-            # Wenn kein Bild gesendet wurde, wird dies als normaler Text-Chat behandelt.
             return jsonify({"error": "Kein Bild empfangen"}), 400
             
         img_data = img_file.read()
         
-        # Base64-Kodierung für das Gemini-Format (umgeht Import-Probleme)
+        # Base64-Kodierung für das Gemini-Format
         img_part = {
             "inline_data": {
                 "data": base64.b64encode(img_data).decode("utf-8"),
@@ -188,14 +189,11 @@ def chat_image():
 
         # 3. System-Prompt als Konfiguration
         personality_prompt = get_personality(mode)
-        
-        # Reine Konversations-Historie (ohne System-Prompt)
         messages = format_history_for_gemini(history)
             
         # 4. Aktuelle User-Nachricht (Bild und Text)
         parts = [img_part]
         if text.strip():
-            # Wichtig: Text muss auch als Objekt im Parts-Array sein.
             parts.append({"text": text})
             
         messages.append({"role": "user", "parts": parts})
@@ -203,7 +201,7 @@ def chat_image():
         # 5. Generierung mit system_instruction
         model_instance = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            # KORREKTUR: System-Prompt als system_instruction übergeben
+            # System-Prompt als system_instruction übergeben
             config=genai.types.GenerateContentConfig(
                 system_instruction=personality_prompt
             )
@@ -214,8 +212,12 @@ def chat_image():
 
         return jsonify({"response": text_resp or "Keine Antwort vom Modell erhalten."})
         
+    except APIError as e:
+        print(f"❌ GEMINI API FEHLER (4xx/5xx): {e}")
+        return jsonify({"error": f"API-Fehler. Der Schlüssel ist möglicherweise ungültig oder hat Quota-Probleme. Details: {e}"}), 500
+
     except Exception as e:
-        print("❌ FEHLER IN /chat-image (500 Internal Server Error):\n", traceback.format_exc())
+        print("❌ ALLGEMEINER FEHLER IN /chat-image:\n", traceback.format_exc())
         return jsonify({"error": "Ein interner Serverfehler ist bei der Bildverarbeitung aufgetreten."}), 500
 
 
@@ -229,5 +231,3 @@ if __name__ == "__main__":
         port = int(os.environ.get("PORT", 5000))
         print(f"🚀 Server läuft auf Port {port}")
         app.run(host="0.0.0.0", port=port)
-
-
