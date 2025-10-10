@@ -6,29 +6,30 @@ import os
 import json
 import traceback
 from typing import List, Dict, Any
-from google.generativeai.errors import APIError
 
+# -------------------------------------------------------
+# START: APP-INSTANZIIERUNG
+# -------------------------------------------------------
 app = Flask(__name__)
 
-# -------------------------------------------------------
-# Konfiguration & ACHTUNG: Hardcodierter API-Schlüssel
-# -------------------------------------------------------
-
-# ✅ KORREKTUR: CORS mit Wildcard-Endpunkt für den Sub-Pfad des Frontends.
-# Dies sollte den "Load Failed" Fehler (wegen blockierter CORS-Antwort) beheben.
+# ✅ KORREKTUR: CORS-Link auf die korrekte GitHub-Pages-URL gesetzt.
 CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io/JohannAI"}}, supports_credentials=True)
 
-# ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code. 
+# -------------------------------------------------------
+# KONFIGURATION & API-SCHLÜSSEL
+# -------------------------------------------------------
+# ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code.
 API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
 
 try:
     # Zurück zur einfacheren Konfiguration
     genai.configure(api_key=API_KEY)
+    API_KEY_CONFIGURED = True
+    print("✅ Gemini Modell erfolgreich konfiguriert.")
 except Exception as e:
     print(f"❌ FEHLER bei der Konfiguration des Gemini-Modells: {e}")
     API_KEY_CONFIGURED = False
-else:
-    API_KEY_CONFIGURED = True
+
 
 # -------------------------------------------------------
 # Persönlichkeits-Prompts
@@ -81,10 +82,10 @@ def get_personality(mode: str) -> str:
 def format_history_for_gemini(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Extrahiert NUR die Konversations-Historie (ohne System-Prompt und aktueller Nachricht)."""
     
+    # Historie ist der Bereich zwischen dem System-Prompt (Index 0) und der letzten Nachricht (Index -1)
     if len(history) < 2:
         return []
 
-    # Die Historie ist der Bereich zwischen dem System-Prompt (Index 0) und der letzten Nachricht (Index -1)
     conversation_history = history[1:-1]
     
     messages = []
@@ -129,7 +130,6 @@ def chat():
         # 4. Modellanfrage mit system_instruction
         model_instance = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            # System-Prompt als system_instruction übergeben
             config=genai.types.GenerateContentConfig(
                 system_instruction=personality_prompt
             )
@@ -140,14 +140,16 @@ def chat():
 
         return jsonify({"response": text or "Keine Antwort vom Modell erhalten."})
         
-    except APIError as e:
-        # Dies fängt spezifische API-Fehler (403, 400, 500) ab
-        print(f"❌ GEMINI API FEHLER (4xx/5xx): {e}")
-        return jsonify({"error": f"API-Fehler. Der Schlüssel ist möglicherweise ungültig oder hat Quota-Probleme. Details: {e}"}), 500
-
     except Exception as e:
-        print("❌ ALLGEMEINER FEHLER IN /chat:\n", traceback.format_exc())
-        return jsonify({"error": "Ein interner Serverfehler ist aufgetreten. Prüfen Sie das Render-Log."}), 500
+        # Fängt alle Fehler ab, einschließlich APIError, ohne speziellen Import
+        print(f"❌ FEHLER IN /chat (Detail: {e}):\n", traceback.format_exc())
+        
+        # Wenn der Fehler eine leere Antwort ist, ist das ein Format- oder API-Quota-Problem.
+        error_msg = str(e)
+        if "API" in error_msg or "400" in error_msg or "500" in error_msg:
+             return jsonify({"error": "API-Fehler. Der Schlüssel ist möglicherweise ungültig oder hat Quota-Probleme."}), 500
+        
+        return jsonify({"error": "Ein interner Serverfehler ist aufgetreten."}), 500
 
 
 # -------------------------------------------------------
@@ -201,7 +203,6 @@ def chat_image():
         # 5. Generierung mit system_instruction
         model_instance = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            # System-Prompt als system_instruction übergeben
             config=genai.types.GenerateContentConfig(
                 system_instruction=personality_prompt
             )
@@ -212,12 +213,14 @@ def chat_image():
 
         return jsonify({"response": text_resp or "Keine Antwort vom Modell erhalten."})
         
-    except APIError as e:
-        print(f"❌ GEMINI API FEHLER (4xx/5xx): {e}")
-        return jsonify({"error": f"API-Fehler. Der Schlüssel ist möglicherweise ungültig oder hat Quota-Probleme. Details: {e}"}), 500
-
     except Exception as e:
-        print("❌ ALLGEMEINER FEHLER IN /chat-image:\n", traceback.format_exc())
+        # Fängt alle Fehler ab, einschließlich APIError, ohne speziellen Import
+        print(f"❌ FEHLER IN /chat-image (Detail: {e}):\n", traceback.format_exc())
+        
+        error_msg = str(e)
+        if "API" in error_msg or "400" in error_msg or "500" in error_msg:
+             return jsonify({"error": "API-Fehler bei Bildverarbeitung. Der Schlüssel ist möglicherweise ungültig oder hat Quota-Probleme."}), 500
+        
         return jsonify({"error": "Ein interner Serverfehler ist bei der Bildverarbeitung aufgetreten."}), 500
 
 
