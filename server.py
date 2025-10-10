@@ -183,3 +183,4 @@ def chat_image():
 #         port = int(os.environ.get("PORT", 5000))
 #         print(f"🚀 Server läuft auf Port {port}")
 #         app.run(host="0.0.0.0", port=port)
+
