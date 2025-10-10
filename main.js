@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Andere Variablen
-    const API_URL = "https://johannai-1.onrender.com";
+    const API_URL = "https://johannai.onrender.com";
     const sendBtn = document.getElementById("send-btn");
     const userInput = document.getElementById("user-input");
     const chatDisplay = document.getElementById("chat-display");
@@ -449,4 +449,5 @@ Rizz AI:
 
     console.log("Script main.js loaded");
 });
+
 
