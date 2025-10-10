@@ -14,7 +14,7 @@ app = Flask(__name__)
 # -------------------------------------------------------
 
 # CORS nur für deine GitHub-Page
-CORS(app, resources={r"/*": {"origins": "http://johannliebertus.github.io/JohannAI/"}}, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "https://github.com/JohannLiebertus/JohannAI/"}}, supports_credentials=True)
 
 # ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code. 
 API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
@@ -229,4 +229,5 @@ if __name__ == "__main__":
         port = int(os.environ.get("PORT", 5000))
         print(f"🚀 Server läuft auf Port {port}")
         app.run(host="0.0.0.0", port=port)
+
 
