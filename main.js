@@ -258,75 +258,93 @@ Rizz AI:
     if (e.key === "Enter") sendMessage();
   });
 
-  function sendMessage() {
+  // ERSETZE DIESEN BLOCK IN DEINER main.js
+function sendMessage() {
     const text = userInput.value.trim();
     const imageFile = imageInput.files[0];
 
     if (!text && !imageFile) {
-      alert("Bitte gib eine Nachricht ein.");
-      return;
+        alert("Bitte gib eine Nachricht ein.");
+        return;
     }
 
-    addTypingIndicator("bot"); // Zeige "types..." im Chat mit Bild
+    addTypingIndicator("bot");
 
     if (currentMode === "evil" && !modeUnlocked?.evil) {
-      addMessage("bot", "🚨enter password before you use Evil Mode🚨");
-      hideTypingIndicator();
-      return;
+        addMessage("bot", "🚨enter password before you use Evil Mode🚨");
+        hideTypingIndicator();
+        return;
     }
 
     if (imageFile) {
-      const imgUrl = URL.createObjectURL(imageFile);
-      addMessage("user", imgUrl, true);
+        const imgUrl = URL.createObjectURL(imageFile);
+        addMessage("user", imgUrl, true);
     }
 
     if (text) {
-      addMessage("user", text);
+        addMessage("user", text);
     }
 
+    // Historie vorbereiten
     const systemPrompt = { role: "system", content: modePrompts[currentMode] || "" };
     const userMsg = { role: "user", content: text };
-
     const historyToSend =
-      currentMode === "evil"
-        ? [systemPrompt, userMsg]
-        : [systemPrompt, ...chatHistory.filter((msg) => msg.role !== "system"), userMsg];
+        currentMode === "evil"
+            ? [systemPrompt, userMsg]
+            : [systemPrompt, ...chatHistory.filter((msg) => msg.role !== "system"), userMsg];
 
-    if (imageFile) {
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      formData.append("text", text);
-      formData.append("mode", currentMode);
-      formData.append("history", JSON.stringify(historyToSend));
 
-      fetch(`${API_URL}/chat-image`, { method: "POST", body: formData })
-        .then(handleResponse)
+    // HIER BEGINNT DIE VERBESSERTE FEHLERBEHANDLUNG
+    const requestPromise = imageFile
+        ? fetch(`${API_URL}/chat-image`, { method: "POST", body: createFormData(imageFile, text, currentMode, historyToSend) })
+        : fetch(`${API_URL}/chat`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ history: historyToSend, mode: currentMode, message: text }),
+          });
+
+    requestPromise
+        .then(res => {
+            if (!res.ok) {
+                // Bei HTTP 4xx/5xx wird hier ein Fehler geworfen
+                throw new Error(`HTTP ${res.status}`);
+            }
+            return handleResponse(res);
+        })
         .catch((err) => {
-          addMessage("error", "Fehler: " + err.message);
-          hideTypingIndicator();
+            // Fängt Timeouts ("Load failed") und HTTP-Fehler (500) ab
+            const errMsg = err.message.includes("HTTP") 
+                ? err.message 
+                : "Load failed (Möglicherweise Timeout oder Netzwerkfehler)";
+            
+            addMessage("error", "Fehler: " + errMsg);
+            hideTypingIndicator();
         });
-    } else {
-      fetch(`${API_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          history: historyToSend,
-          mode: currentMode,
-          message: text,
-        }),
-      })
-        .then(handleResponse)
-        .catch((err) => {
-          addMessage("error", "Fehler: " + err.message);
-          hideTypingIndicator();
-        });
-    }
+    // ENDE DER VERBESSERTEN FEHLERBEHANDLUNG
+
 
     userInput.value = "";
     imageInput.value = "";
     previewImg.src = "";
     imagePreview.style.display = "none";
-  }
+}
+
+// NEUE HILFSFUNKTION FÜR FORM DATA
+function createFormData(imageFile, text, mode, historyToSend) {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    formData.append("text", text);
+    formData.append("mode", mode);
+    formData.append("history", JSON.stringify(historyToSend));
+    return formData;
+}
+
+// ... Der Rest von main.js bleibt gleich ...
+// HINWEIS: Du musst die handleResponse-Funktion nicht ändern!
+// Sie muss nur noch aus der fetch-Kette entfernt werden.
+
+// Entferne handleResponse aus deiner main.js! (Sie ist jetzt in der sendMessage-Kette integriert)
+// async function handleResponse(res) { ... } <- Diesen gesamten Block löschen!
 
 async function handleResponse(res) {
   hideTypingIndicator();
@@ -411,6 +429,7 @@ async function handleResponse(res) {
 
   console.log("Script main.js loaded");
 });
+
 
 
 
