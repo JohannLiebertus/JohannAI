@@ -18,11 +18,16 @@ CORS(app, resources={r"/*": {"origins": "https://johannliebertus.github.io/Johan
 # -------------------------------------------------------
 # KONFIGURATION & API-SCHLÜSSEL
 # -------------------------------------------------------
-# ⚠️ SICHERHEITSRISIKO: Der API-Schlüssel ist direkt im Code.
-API_KEY = "AIzaSyCWBjl0hLaIVI5nNQe84isNT-0RJpHNF4w"
+# 🔑 KORREKTUR: Schlüssel wird aus der Render-Umgebungsvariable ausgelesen.
+API_KEY = os.getenv("GEMINI_API_KEY") 
+API_KEY_CONFIGURED = False
 
 try:
-    # Zurück zur einfacheren Konfiguration
+    if not API_KEY:
+        # Dies wird ausgelöst, wenn der Key in Render nicht gefunden wird.
+        raise ValueError("GEMINI_API_KEY nicht in Umgebungsvariablen gefunden.")
+        
+    # Konfiguration mit dem ausgelesenen Schlüssel
     genai.configure(api_key=API_KEY)
     API_KEY_CONFIGURED = True
     print("✅ Gemini Modell erfolgreich konfiguriert.")
@@ -35,7 +40,7 @@ except Exception as e:
 # Persönlichkeits-Prompts (Hier gekürzt aus Platzgründen, muss vollständig sein)
 # -------------------------------------------------------
 def get_personality(mode: str) -> str:
-    # ... (Alle Prompts wie in Version 11) ...
+    # Stellen Sie sicher, dass hier alle Ihre Prompts stehen
     if mode == "johann":
         return """Du bist Johann Liebert – ein hochintelligenter, charismatischer und manipulativer Charakter... (vollständiger Prompt)"""
     # ... (Rest der Prompts) ...
@@ -47,7 +52,6 @@ def get_personality(mode: str) -> str:
 # Hilfsfunktion zur Formatierung der Historie
 # -------------------------------------------------------
 def format_history_for_gemini(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    # ... (Funktion wie in Version 11) ...
     if len(history) < 2:
         return []
     conversation_history = history[1:-1]
@@ -121,7 +125,7 @@ def chat_image():
         img_file = request.files.get("image")
         text = request.form.get("text", "")
         mode = request.form.get("mode", "johann")
-        history_str = request.form.get("history", "[]") 
+        history_str = request.form.get("history", "[]")
         
         if not img_file:
             return jsonify({"error": "Kein Bild empfangen"}), 400
@@ -173,6 +177,8 @@ if __name__ == "__main__":
     if not API_KEY_CONFIGURED:
         print("🚨 Server wird nicht gestartet, da der API-Schlüssel ungültig ist. 🚨")
     else:
+        # ⚠️ WARNUNG: Dieser Code startet den Development-Server.
+        # Im Render Start Command sollte 'python -m gunicorn server:app' verwendet werden.
         port = int(os.environ.get("PORT", 5000))
         print(f"🚀 Server läuft auf Port {port}")
         app.run(host="0.0.0.0", port=port)
