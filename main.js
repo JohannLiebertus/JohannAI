@@ -262,7 +262,7 @@ Rizz AI:
     });
 
     // ----------------------------------------------------
-    // NEUE HILFSFUNKTION FÜR FORM DATA
+    // HILFSFUNKTION FÜR FORM DATA
     // ----------------------------------------------------
     function createFormData(imageFile, text, mode, historyToSend) {
         const formData = new FormData();
@@ -314,28 +314,38 @@ Rizz AI:
                 ? [systemPrompt, userMsg] // Evil Mode sendet keine Historie, nur Prompt + aktuelle Nachricht
                 : [systemPrompt, ...conversationHistory, userMsg]; // Alle Nachrichten + System-Prompt
 
-        // 2. Request Promise erstellen (Text oder Bild)
-        const requestPromise = imageFile
-            ? fetch(`${API_URL}/chat-image`, { 
-                method: "POST", 
-                body: createFormData(imageFile, text, currentMode, historyToSend) 
-              })
-            : fetch(`${API_URL}/chat`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ 
-                      history: historyToSend, 
-                      mode: currentMode, 
-                      message: text 
-                  }),
-              });
+        // 2. Timeout-Controller erstellen
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 Sekunden Timeout
 
-        // 3. Ausführung mit verbesserter Fehlerbehandlung
+        // 3. Request Promise erstellen (Text oder Bild)
+        const fetchOptions = {
+            method: "POST",
+            signal: controller.signal // Verbindet den Timeout-Controller mit dem Fetch
+        };
+
+        let requestPromise;
+        if (imageFile) {
+            fetchOptions.body = createFormData(imageFile, text, currentMode, historyToSend);
+            requestPromise = fetch(`${API_URL}/chat-image`, fetchOptions);
+        } else {
+            fetchOptions.headers = { "Content-Type": "application/json" };
+            fetchOptions.body = JSON.stringify({ 
+                history: historyToSend, 
+                mode: currentMode, 
+                message: text 
+            });
+            requestPromise = fetch(`${API_URL}/chat`, fetchOptions);
+        }
+
+        // 4. Ausführung mit verbesserter Fehlerbehandlung
         requestPromise
             .then(res => {
+                clearTimeout(timeoutId); // Timeout löschen, wenn die Antwort schnell kommt
+
                 // Bei HTTP 4xx/5xx wird hier ein Fehler geworfen
                 if (!res.ok) {
-                    // Der Backend-Code sendet bei API-Fehler 500 mit JSON-Error-Objekt
+                    // Versuche, eine JSON-Fehlermeldung zu parsen
                     if (res.status >= 400 && res.status < 600) {
                          return res.json().then(data => {
                             throw new Error(`HTTP ${res.status}: ${data.error || "Unbekannter API-Fehler"}`);
@@ -365,16 +375,22 @@ Rizz AI:
                 chatDisplay.scrollTop = chatDisplay.scrollHeight;
             })
             .catch((err) => {
-                // Fängt Timeouts ("Load failed") und HTTP-Fehler (500) ab
+                clearTimeout(timeoutId);
                 hideTypingIndicator();
-                const errMsg = err.message.includes("HTTP") 
-                    ? err.message 
-                    : "Load failed (Möglicherweise Timeout oder Netzwerkfehler)";
+
+                let errMsg;
+                if (err.name === 'AbortError') {
+                    errMsg = "Timeout (Render-Server im Schlafmodus). Bitte warten Sie kurz und versuchen Sie es erneut.";
+                } else if (err.message.includes("HTTP")) {
+                    errMsg = err.message;
+                } else {
+                    errMsg = "Load failed (Möglicherweise Netzwerkfehler oder Render-Inaktivität)";
+                }
                 
                 addMessage("error", "Fehler: " + errMsg);
             });
         
-        // 4. Eingabefelder leeren
+        // 5. Eingabefelder leeren
         userInput.value = "";
         imageInput.value = "";
         previewImg.src = "";
